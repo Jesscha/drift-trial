@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@drift-labs/sdk": "2.118.0-beta.5",
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
+    "@solana/web3.js": "^1.98.0",
+    "add": "^2.0.6",
+    "crypto": "^1.0.1",
     "next": "15.2.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

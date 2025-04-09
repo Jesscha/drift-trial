@@ -1,4 +1,4 @@
-import DriftDashboard from './components/DriftDashboard';
+import DriftDashboard from "./components/DriftDashboard";
 
 export default function Home() {
   return (

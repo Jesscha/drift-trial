@@ -1,21 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useDrift } from "../../contexts/DriftContext";
 
 export default function Header() {
-  const [connected, setConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
+  const {
+    walletConnected,
+    walletPublicKey,
+    connectWallet,
+    disconnectWallet,
+    isInitializing,
+  } = useDrift();
   const [searchWallet, setSearchWallet] = useState("");
 
-  const handleConnect = () => {
-    // Mock wallet connection
-    setConnected(true);
-    setWalletAddress("5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm");
+  const handleConnect = async () => {
+    await connectWallet();
   };
 
   const handleDisconnect = () => {
-    setConnected(false);
-    setWalletAddress("");
+    disconnectWallet();
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -67,11 +70,11 @@ export default function Header() {
             </button>
           </form>
 
-          {connected ? (
+          {walletConnected ? (
             <div className="flex items-center space-x-2">
               <span className="text-white">
-                {walletAddress.substring(0, 4)}...
-                {walletAddress.substring(walletAddress.length - 4)}
+                {walletPublicKey?.substring(0, 4)}...
+                {walletPublicKey?.substring((walletPublicKey?.length || 0) - 4)}
               </span>
               <button
                 onClick={handleDisconnect}
@@ -83,9 +86,12 @@ export default function Header() {
           ) : (
             <button
               onClick={handleConnect}
-              className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+              disabled={isInitializing}
+              className={`bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 ${
+                isInitializing ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              Connect Wallet
+              {isInitializing ? "Connecting..." : "Connect Wallet"}
             </button>
           )}
         </div>

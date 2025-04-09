@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { Subaccount, markets } from "../../utils/mockData";
+import { useDrift } from "../../contexts/DriftContext";
 
 interface TradingPanelProps {
   subaccount: Subaccount;
 }
 
 export default function TradingPanel({ subaccount }: TradingPanelProps) {
+  // Note: subaccount parameter is used in the UI components for displaying account information
+  const { driftClient, walletConnected } = useDrift();
+
+  console.log("driftClient", driftClient);
   const [market, setMarket] = useState(markets[0]);
   const [orderType, setOrderType] = useState("Market");
   const [side, setSide] = useState("Buy");
@@ -20,9 +25,31 @@ export default function TradingPanel({ subaccount }: TradingPanelProps) {
   const [scaleStart, setScaleStart] = useState("");
   const [scaleEnd, setScaleEnd] = useState("");
   const [scaleSteps, setScaleSteps] = useState("3");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<{
+    message: string;
+    isError: boolean;
+  } | null>(null);
 
-  // Use subaccount information in component context
-  const hasBalance = subaccount.balances.length > 0;
+  // Find the available balance for the current market asset
+  const getAvailableBalance = () => {
+    const asset = market.id.split("-")[0];
+    const tokenBalance = subaccount.balances.find((b) => b.asset === asset);
+    return tokenBalance ? tokenBalance.available : 0;
+  };
+
+  // Check if user has sufficient balance
+  const hasSufficientBalance = () => {
+    if (side === "Buy") {
+      // For Buy orders, check if user has enough USDC
+      const usdcBalance = subaccount.balances.find((b) => b.asset === "USDC");
+      return usdcBalance && usdcBalance.available >= calculateTotal();
+    } else {
+      // For Sell orders, check if user has enough of the asset
+      const assetBalance = getAvailableBalance();
+      return assetBalance >= parseFloat(size);
+    }
+  };
 
   // Handle market change and update price
   const handleMarketChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -42,25 +69,76 @@ export default function TradingPanel({ subaccount }: TradingPanelProps) {
   };
 
   // Handle order placement
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would call the Drift SDK to place the order
-    console.log("Order placed:", {
-      market: market.id,
-      type: orderType,
-      side,
-      size,
-      price: orderType === "Market" ? market.price : parseFloat(price),
-      takeProfit: takeProfitPrice ? parseFloat(takeProfitPrice) : undefined,
-      stopLoss: stopLossPrice ? parseFloat(stopLossPrice) : undefined,
-      scaleOrders: scaleOrdersEnabled
-        ? {
-            start: parseFloat(scaleStart),
-            end: parseFloat(scaleEnd),
-            steps: parseInt(scaleSteps),
-          }
-        : undefined,
-    });
+
+    if (!driftClient || !walletConnected) {
+      setOrderStatus({
+        message: "Please connect your wallet first",
+        isError: true,
+      });
+      return;
+    }
+
+    if (!hasSufficientBalance()) {
+      setOrderStatus({
+        message: "Insufficient balance for this order",
+        isError: true,
+      });
+      return;
+    }
+
+    try {
+      setIsPlacingOrder(true);
+      setOrderStatus(null);
+
+      const orderParams = {
+        market: market.id,
+        type: orderType,
+        side,
+        size: parseFloat(size),
+        price: orderType === "Market" ? market.price : parseFloat(price),
+        takeProfit: takeProfitPrice ? parseFloat(takeProfitPrice) : undefined,
+        stopLoss: stopLossPrice ? parseFloat(stopLossPrice) : undefined,
+        scaleOrders: scaleOrdersEnabled
+          ? {
+              start: parseFloat(scaleStart),
+              end: parseFloat(scaleEnd),
+              steps: parseInt(scaleSteps),
+            }
+          : undefined,
+      };
+
+      console.log("Placing order with Drift client:", orderParams);
+
+      // In a real implementation, we would call the appropriate Drift SDK methods
+      // For example:
+      // For market orders:
+      // await driftClient.placeAndTakeOrder({
+      //   marketIndex: getMarketIndexById(market.id),
+      //   direction: side === 'Buy' ? PositionDirection.LONG : PositionDirection.SHORT,
+      //   baseAssetAmount: new BN(parseFloat(size) * PRECISION),
+      //   reduceOnly: false
+      // });
+
+      // Simulate a delayed response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setOrderStatus({
+        message: "Order placed successfully",
+        isError: false,
+      });
+    } catch (err) {
+      console.error("Error placing order:", err);
+      setOrderStatus({
+        message: `Order failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        isError: true,
+      });
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   return (
@@ -72,6 +150,25 @@ export default function TradingPanel({ subaccount }: TradingPanelProps) {
           <span className="text-white font-medium">
             ${market.price.toLocaleString()}
           </span>
+        </div>
+      </div>
+
+      <div className="mb-4 p-3 bg-gray-700 rounded">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-400">Available Balance:</span>
+          <div>
+            <span className="text-white font-medium">
+              {getAvailableBalance().toLocaleString()} {market.id.split("-")[0]}
+            </span>
+            {subaccount.balances.find((b) => b.asset === "USDC") && (
+              <span className="text-white font-medium ml-3">
+                {subaccount.balances
+                  .find((b) => b.asset === "USDC")
+                  ?.available.toLocaleString()}{" "}
+                USDC
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -334,18 +431,39 @@ export default function TradingPanel({ subaccount }: TradingPanelProps) {
           )}
         </div>
 
-        <button
-          type="submit"
-          className={`w-full py-3 rounded-lg font-medium ${
-            side === "Buy"
-              ? "bg-green-600 hover:bg-green-700 text-white"
-              : "bg-red-600 hover:bg-red-700 text-white"
-          }`}
-          disabled={!hasBalance}
-        >
-          {side === "Buy" ? "Buy / Long" : "Sell / Short"}{" "}
-          {market.id.split("-")[0]}
-        </button>
+        {orderStatus && (
+          <div
+            className={`mb-4 p-2 rounded text-sm ${
+              orderStatus.isError
+                ? "bg-red-900 text-red-100"
+                : "bg-green-900 text-green-100"
+            }`}
+          >
+            {orderStatus.message}
+          </div>
+        )}
+
+        <div className="mt-6">
+          <button
+            type="submit"
+            disabled={
+              isPlacingOrder || !walletConnected || !hasSufficientBalance()
+            }
+            className={`w-full bg-orange-500 text-white py-3 rounded font-medium hover:bg-orange-600 ${
+              isPlacingOrder || !walletConnected || !hasSufficientBalance()
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+          >
+            {!walletConnected
+              ? "Connect Wallet to Trade"
+              : !hasSufficientBalance()
+              ? "Insufficient Balance"
+              : isPlacingOrder
+              ? "Placing Order..."
+              : "Place Order"}
+          </button>
+        </div>
       </form>
     </div>
   );
