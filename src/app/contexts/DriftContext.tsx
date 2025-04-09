@@ -1,15 +1,40 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { Connection, PublicKey, Keypair } from "@solana/web3.js";
 import {
   Wallet,
   DriftClient,
   BulkAccountLoader,
   DRIFT_PROGRAM_ID,
 } from "@drift-labs/sdk";
+import {
+  useWallet,
+  WalletProvider,
+  ConnectionProvider,
+  useConnection,
+} from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+  CoinbaseWalletAdapter,
+  LedgerWalletAdapter,
+  CloverWalletAdapter,
+  TorusWalletAdapter,
+  MathWalletAdapter,
+  Coin98WalletAdapter,
+} from "@solana/wallet-adapter-wallets";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 
-// Define the context type
+import "@solana/wallet-adapter-react-ui/styles.css";
+
 interface DriftContextType {
   driftClient: DriftClient | null;
   isInitializing: boolean;
@@ -20,7 +45,6 @@ interface DriftContextType {
   disconnectWallet: () => void;
 }
 
-// Create context with default values
 const DriftContext = createContext<DriftContextType>({
   driftClient: null,
   isInitializing: false,
@@ -31,44 +55,67 @@ const DriftContext = createContext<DriftContextType>({
   disconnectWallet: () => {},
 });
 
-// Hook to use the Drift context
 export const useDrift = () => useContext(DriftContext);
 
-interface DriftProviderProps {
-  children: ReactNode;
-}
+const DriftAdapterWrapper: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const { connection } = useConnection();
+  const {
+    publicKey,
+    connected,
+    disconnect,
+    connect,
+    wallet,
+    signTransaction,
+    signAllTransactions,
+  } = useWallet();
 
-export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
   const [driftClient, setDriftClient] = useState<DriftClient | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [walletConnected, setWalletConnected] = useState(false);
   const [walletPublicKey, setWalletPublicKey] = useState<string | null>(null);
-  console.log("walletPublicKey", walletPublicKey);
 
-  // Function to initialize the Drift client
-  const initializeDriftClient = async (walletToUse: Wallet) => {
+  useEffect(() => {
+    if (publicKey) {
+      setWalletPublicKey(publicKey.toString());
+    } else {
+      setWalletPublicKey(null);
+    }
+  }, [publicKey]);
+
+  const initializeDriftClient = async () => {
+    if (!publicKey || !signTransaction || !signAllTransactions) {
+      setError(new Error("Wallet connection incomplete"));
+      return null;
+    }
+
     try {
       setIsInitializing(true);
       setError(null);
 
-      // Connect to Solana devnet
-      const connection = new Connection(
-        "https://api.devnet.solana.com",
-        "confirmed"
-      );
-
-      // Create account loader
       const accountLoader = new BulkAccountLoader(
         connection,
         "confirmed",
         1000
       );
 
-      // Create Drift client instance
+      const driftWallet: Wallet = {
+        publicKey,
+        signTransaction,
+        signAllTransactions,
+        payer: new Keypair(),
+        signVersionedTransaction: async (tx) => {
+          throw new Error("signVersionedTransaction not implemented");
+        },
+        signAllVersionedTransactions: async (txs) => {
+          throw new Error("signAllVersionedTransactions not implemented");
+        },
+      };
+
       const client = new DriftClient({
         connection,
-        wallet: walletToUse,
+        wallet: driftWallet,
         programID: new PublicKey(DRIFT_PROGRAM_ID),
         accountSubscription: {
           type: "polling",
@@ -76,7 +123,6 @@ export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
         },
       });
 
-      // Initialize the client
       await client.subscribe();
 
       setDriftClient(client);
@@ -91,20 +137,17 @@ export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
     }
   };
 
-  // Connect wallet (mock for now)
   const connectWallet = async () => {
     try {
-      // For demo purposes, use a new Keypair
-      // In a real app, this would integrate with a wallet provider like Phantom
-      const keypair = Keypair.generate();
-      const dummyWallet = new Wallet(keypair);
-      console.log("dummyWallet", dummyWallet);
+      if (!wallet) {
+        throw new Error("No wallet selected");
+      }
 
-      setWalletConnected(true);
-      setWalletPublicKey(keypair.publicKey.toString());
+      await connect();
 
-      // Initialize Drift client with the new wallet
-      await initializeDriftClient(dummyWallet);
+      if (connected && publicKey) {
+        await initializeDriftClient();
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
@@ -112,24 +155,27 @@ export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
     }
   };
 
-  // Disconnect wallet
   const disconnectWallet = () => {
-    setWalletConnected(false);
-    setWalletPublicKey(null);
-
-    // Cleanup: unsubscribe from the drift client if exists
     if (driftClient) {
       driftClient.unsubscribe();
       setDriftClient(null);
     }
+
+    disconnect();
   };
+
+  useEffect(() => {
+    if (connected && publicKey && !driftClient) {
+      initializeDriftClient();
+    }
+  }, [connected, publicKey]);
 
   // Context value
   const value = {
     driftClient,
     isInitializing,
     error,
-    walletConnected,
+    walletConnected: connected,
     walletPublicKey,
     connectWallet,
     disconnectWallet,
@@ -137,5 +183,35 @@ export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
 
   return (
     <DriftContext.Provider value={value}>{children}</DriftContext.Provider>
+  );
+};
+
+interface DriftProviderProps {
+  children: ReactNode;
+}
+
+export const DriftProvider: React.FC<DriftProviderProps> = ({ children }) => {
+  // Set up wallet adapters
+  const wallets = [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+    new CoinbaseWalletAdapter(),
+    new LedgerWalletAdapter(),
+    new CloverWalletAdapter(),
+    new TorusWalletAdapter(),
+    new MathWalletAdapter(),
+    new Coin98WalletAdapter(),
+  ];
+
+  const endpoint = "https://api.devnet.solana.com";
+
+  return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect={true}>
+        <WalletModalProvider>
+          <DriftAdapterWrapper>{children}</DriftAdapterWrapper>
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 };

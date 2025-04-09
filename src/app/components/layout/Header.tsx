@@ -2,24 +2,11 @@
 
 import { useState } from "react";
 import { useDrift } from "../../contexts/DriftContext";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Header() {
-  const {
-    walletConnected,
-    walletPublicKey,
-    connectWallet,
-    disconnectWallet,
-    isInitializing,
-  } = useDrift();
+  const { walletConnected, walletPublicKey, isInitializing } = useDrift();
   const [searchWallet, setSearchWallet] = useState("");
-
-  const handleConnect = async () => {
-    await connectWallet();
-  };
-
-  const handleDisconnect = () => {
-    disconnectWallet();
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,30 +57,16 @@ export default function Header() {
             </button>
           </form>
 
-          {walletConnected ? (
-            <div className="flex items-center space-x-2">
+          {walletConnected && walletPublicKey && (
+            <div className="flex items-center space-x-2 mr-2">
               <span className="text-white">
                 {walletPublicKey?.substring(0, 4)}...
                 {walletPublicKey?.substring((walletPublicKey?.length || 0) - 4)}
               </span>
-              <button
-                onClick={handleDisconnect}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                Disconnect
-              </button>
             </div>
-          ) : (
-            <button
-              onClick={handleConnect}
-              disabled={isInitializing}
-              className={`bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 ${
-                isInitializing ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-            >
-              {isInitializing ? "Connecting..." : "Connect Wallet"}
-            </button>
           )}
+
+          <WalletMultiButton className="!bg-orange-500 hover:!bg-orange-600" />
         </div>
       </div>
     </header>
