@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/layout/Header";
-import { Providers } from "./contexts/WalletContext";
+import { Providers } from "./providers/Providers";
 
 export const metadata: Metadata = {
   title: "Drift Protocol Frontend",

@@ -1,11 +1,26 @@
 import driftService from "./client";
 
-export const getUserAccount = async () => {
+// Our simplified interface that matches the properties we use from the SDK's user account
+export interface UserAccount {
+  totalCollateral: string;
+  freeCollateral: string;
+}
+
+export const getUserAccount = async (): Promise<UserAccount | null> => {
   const client = driftService.getClient();
   if (!client) throw new Error("Drift client not initialized");
 
   try {
-    return await client.getUserAccount();
+    const sdkAccount = await client.getUserAccount();
+    if (!sdkAccount) return null;
+
+    // Create our custom object without relying on SDK type properties
+    const result: UserAccount = {
+      totalCollateral: (sdkAccount as any).totalCollateral?.toString() || "0",
+      freeCollateral: (sdkAccount as any).freeCollateral?.toString() || "0",
+    };
+
+    return result;
   } catch (error) {
     console.error("Failed to get user account:", error);
     return null;
@@ -23,8 +38,8 @@ export const getUserStats = async () => {
     }
 
     return {
-      totalCollateral: userAccount.totalCollateral?.toString() || "0",
-      freeCollateral: userAccount.freeCollateral?.toString() || "0",
+      totalCollateral: (userAccount as any).totalCollateral?.toString() || "0",
+      freeCollateral: (userAccount as any).freeCollateral?.toString() || "0",
       leverage: "1.0", // Simplified
       pnl: "0", // Simplified
     };
