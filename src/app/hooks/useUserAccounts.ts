@@ -1,8 +1,8 @@
-import { DriftClient } from "@drift-labs/sdk";
+import { DriftClient, UserAccount } from "@drift-labs/sdk";
 import { useDriftClient } from "./useDriftClient";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { getUserAccount, UserAccount } from "../services/drift/account";
 import useSWR from "swr";
+import { getUserAccount } from "@/services/drift/account";
 
 export function useUserAccounts() {
   const { isInitialized, client } = useDriftClient();
@@ -24,6 +24,7 @@ export function useUserAccounts() {
       errorRetryCount: 3,
     }
   );
+  console.log("userAccount", userAccount);
 
   return {
     userAccount,

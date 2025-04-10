@@ -3,14 +3,39 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useUserAccounts } from "./hooks/useUserAccounts";
 import { SettingsPanel } from "./components/settings";
+import { deposit } from "../services/drift/deposit";
+import { useDriftClient } from "./hooks/useDriftClient";
+import { useTransactions } from "./hooks/useTransactions";
+import { TransactionToasts } from "./components/TransactionToasts";
+import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 
 export default function Home() {
   const { publicKey, connected } = useWallet();
   const { userAccount, isLoading, error, refreshUserAccount } =
     useUserAccounts();
 
+  const { isInitialized } = useDriftClient();
+  const { trackTransaction } = useTransactions();
+
+  const handleDeposit = async () => {
+    try {
+      const txhash = await deposit({ amount: 0.1 });
+      console.log("txhash", txhash);
+
+      // Track transaction with success actions
+      trackTransaction(txhash, "Deposit 0.1 SOL", [
+        { type: TransactionSuccessActionType.UPDATE_USER_ACCOUNT },
+      ]);
+    } catch (error) {
+      console.error("Deposit failed:", error);
+    }
+  };
+
   return (
     <main className="container mx-auto p-4">
+      {/* Transaction toast notifications */}
+      <TransactionToasts />
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8">
           <div className="bg-gray-800 rounded-lg p-4 mb-6 text-white">
@@ -53,11 +78,11 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-700 p-3 rounded">
                   <p className="text-gray-400">Total Collateral</p>
-                  <p className="font-bold">{userAccount.totalCollateral}</p>
+                  {/* <p className="font-bold">{userAccount.totalCollateral}</p> */}
                 </div>
                 <div className="bg-gray-700 p-3 rounded">
                   <p className="text-gray-400">Free Collateral</p>
-                  <p className="font-bold">{userAccount.freeCollateral}</p>
+                  {/* <p className="font-bold">{userAccount.freeCollateral}</p> */}
                 </div>
               </div>
               <button
@@ -73,6 +98,12 @@ export default function Home() {
         <div className="md:col-span-4">
           <SettingsPanel />
         </div>
+        <button
+          onClick={handleDeposit}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        >
+          Deposit 0.1 SOL
+        </button>
       </div>
     </main>
   );

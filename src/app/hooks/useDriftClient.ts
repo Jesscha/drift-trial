@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { DriftClient } from "@drift-labs/sdk";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import driftService from "../services/drift/client";
+import driftService from "@/services/drift/client";
 
 export function useDriftClient() {
   const { connection } = useConnection();
