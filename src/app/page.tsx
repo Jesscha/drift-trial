@@ -8,6 +8,8 @@ import { useDriftClient } from "./hooks/useDriftClient";
 import { useTransactions } from "./hooks/useTransactions";
 import { TransactionToasts } from "./components/TransactionToasts";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
+import { Modal } from "./components/Modal";
+import { useModal } from "./hooks/useModal";
 
 export default function Home() {
   const { publicKey, connected } = useWallet();
@@ -16,6 +18,7 @@ export default function Home() {
 
   const { isInitialized } = useDriftClient();
   const { trackTransaction } = useTransactions();
+  const { isOpen, open, close } = useModal(false);
 
   const handleDeposit = async () => {
     try {
@@ -30,6 +33,27 @@ export default function Home() {
       console.error("Deposit failed:", error);
     }
   };
+
+  // Modal footer with action buttons
+  const modalFooter = (
+    <div className="flex justify-end space-x-3">
+      <button
+        onClick={close}
+        className="px-4 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+      >
+        Close
+      </button>
+      <button
+        onClick={() => {
+          // Handle action here
+          close();
+        }}
+        className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
+      >
+        Confirm
+      </button>
+    </div>
+  );
 
   return (
     <main className="container mx-auto p-4">
@@ -98,13 +122,54 @@ export default function Home() {
         <div className="md:col-span-4">
           <SettingsPanel />
         </div>
-        <button
-          onClick={handleDeposit}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          Deposit 0.1 SOL
-        </button>
+        <div className="md:col-span-12 flex space-x-4">
+          <button
+            onClick={handleDeposit}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Deposit 0.1 SOL
+          </button>
+          <button
+            onClick={open}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+          >
+            Open Modal
+          </button>
+        </div>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={close}
+        title="Drift Protocol Modal"
+        footer={modalFooter}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-300">
+            This is your Drift Protocol modal. You can add any content here
+            related to your blockchain operations.
+          </p>
+
+          <div className="bg-gray-700 p-4 rounded">
+            <h3 className="font-medium text-white mb-2">Blockchain Actions:</h3>
+            <ul className="list-disc list-inside text-gray-300 space-y-1">
+              <li>Execute smart contract transactions</li>
+              <li>View transaction history</li>
+              <li>Manage token approvals</li>
+              <li>Configure blockchain settings</li>
+            </ul>
+          </div>
+
+          <div className="mt-4">
+            <input
+              type="text"
+              placeholder="Enter transaction amount"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+            />
+          </div>
+        </div>
+      </Modal>
     </main>
   );
 }
