@@ -2,6 +2,7 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useUserAccounts } from "./hooks/useUserAccounts";
+import { SettingsPanel } from "./components/settings";
 
 export default function Home() {
   const { publicKey, connected } = useWallet();
@@ -69,7 +70,9 @@ export default function Home() {
           )}
         </div>
 
-        <div className="md:col-span-4"></div>
+        <div className="md:col-span-4">
+          <SettingsPanel />
+        </div>
       </div>
     </main>
   );

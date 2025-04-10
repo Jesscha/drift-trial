@@ -25,8 +25,6 @@ export function useUserAccounts() {
     }
   );
 
-  console.log(userAccount);
-
   return {
     userAccount,
     isLoading,

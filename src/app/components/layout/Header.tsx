@@ -17,24 +17,24 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-800 p-4 shadow-md">
+    <header className="bg-gray-800 p-4 shadow-md text-white">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center mb-4 md:mb-0">
           <h1 className="text-white text-2xl font-bold">Drift Protocol</h1>
           <nav className="ml-8 hidden md:block">
             <ul className="flex space-x-6">
               <li>
-                <a href="#" className="text-white hover:text-orange-400">
+                <a href="#" className="text-white hover:text-blue-400">
                   Dashboard
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-orange-400">
+                <a href="#" className="text-white hover:text-blue-400">
                   Markets
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-orange-400">
+                <a href="#" className="text-white hover:text-blue-400">
                   Portfolio
                 </a>
               </li>
@@ -53,7 +53,7 @@ export default function Header() {
             />
             <button
               type="submit"
-              className="bg-orange-500 text-white px-3 py-2 rounded-r hover:bg-orange-600"
+              className="bg-blue-500 text-white px-3 py-2 rounded-r hover:bg-blue-600"
             >
               Search
             </button>
@@ -70,7 +70,7 @@ export default function Header() {
             </div>
           )}
 
-          <WalletMultiButton className="!bg-orange-500 hover:!bg-orange-600" />
+          <WalletMultiButton className="!bg-blue-500 hover:!bg-blue-600" />
         </div>
       </div>
     </header>
