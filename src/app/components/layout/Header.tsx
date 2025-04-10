@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useDrift } from "../../contexts/DriftContext";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useDriftClient } from "../../hooks/useDriftClient";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Header() {
-  const { walletConnected, walletPublicKey, isInitializing } = useDrift();
+  const { publicKey, connected } = useWallet();
+  const { isLoading } = useDriftClient();
   const [searchWallet, setSearchWallet] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -57,11 +59,13 @@ export default function Header() {
             </button>
           </form>
 
-          {walletConnected && walletPublicKey && (
+          {connected && publicKey && (
             <div className="flex items-center space-x-2 mr-2">
               <span className="text-white">
-                {walletPublicKey?.substring(0, 4)}...
-                {walletPublicKey?.substring((walletPublicKey?.length || 0) - 4)}
+                {publicKey?.toString().substring(0, 4)}...
+                {publicKey
+                  ?.toString()
+                  .substring((publicKey?.toString().length || 0) - 4)}
               </span>
             </div>
           )}

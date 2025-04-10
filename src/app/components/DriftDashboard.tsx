@@ -4,7 +4,6 @@ import { useState } from "react";
 import Header from "./layout/Header";
 import SubaccountPanel from "./subaccounts/SubaccountPanel";
 import SubaccountDetails from "./subaccounts/SubaccountDetails";
-import TradingPanel from "./trading/TradingPanel";
 import { mockSubaccounts } from "../utils/mockData";
 
 export default function DriftDashboard() {
@@ -30,8 +29,6 @@ export default function DriftDashboard() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
-
-          <TradingPanel subaccount={activeSubaccount} />
         </div>
       </div>
     </div>
