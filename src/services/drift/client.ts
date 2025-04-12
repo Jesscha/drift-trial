@@ -1,6 +1,5 @@
-import { Connection, PublicKey, Keypair } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import {
-  Wallet,
   DriftClient,
   BulkAccountLoader,
   DRIFT_PROGRAM_ID,

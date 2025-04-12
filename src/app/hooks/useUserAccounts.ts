@@ -2,10 +2,10 @@ import { DriftClient, UserAccount } from "@drift-labs/sdk";
 import { useDriftClient } from "./useDriftClient";
 import { useWallet } from "@solana/wallet-adapter-react";
 import useSWR from "swr";
-import { getUserAccount } from "@/services/drift/account";
+import { getAllUsers, getUserAccount } from "@/services/drift/account";
 
 export function useUserAccounts() {
-  const { isInitialized, client } = useDriftClient();
+  const { isInitialized } = useDriftClient();
   const { publicKey } = useWallet();
 
   const {
@@ -13,18 +13,20 @@ export function useUserAccounts() {
     error,
     isLoading,
     mutate,
-  } = useSWR<UserAccount | null>(
+  } = useSWR<UserAccount[] | null>(
     isInitialized && publicKey ? "userAccount" : null,
-    getUserAccount,
+    () => {
+      if (!publicKey) return null;
+      return getAllUsers(publicKey);
+    },
     {
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
-      refreshInterval: 10000, // Refresh every 10 seconds
+      refreshInterval: 5000, // Refresh every 10 seconds
       shouldRetryOnError: true,
       errorRetryCount: 3,
     }
   );
-  console.log("userAccount", userAccount);
 
   return {
     userAccount,

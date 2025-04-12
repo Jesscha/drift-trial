@@ -10,20 +10,41 @@ import { TransactionToasts } from "./components/TransactionToasts";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 import { Modal } from "./components/Modal";
 import { useModal } from "./hooks/useModal";
+import { useParsedUserData } from "./hooks/useParsedUserData";
+import useSWR from "swr";
+import { BN } from "@drift-labs/sdk";
+import { AccountsPositionsPanel } from "./components/AccountsPositionsPanel";
+
+const useTest = () => {
+  const { data, error, isLoading } = useSWR(
+    "test",
+    () => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(new Map([[1, Math.random()]]));
+        }, 1000);
+      });
+    },
+    {
+      refreshInterval: 1000,
+    }
+  );
+
+  return { data, error, isLoading };
+};
 
 export default function Home() {
   const { publicKey, connected } = useWallet();
   const { userAccount, isLoading, error, refreshUserAccount } =
     useUserAccounts();
+  const { data } = useTest();
 
-  const { isInitialized } = useDriftClient();
   const { trackTransaction } = useTransactions();
   const { isOpen, open, close } = useModal(false);
 
   const handleDeposit = async () => {
     try {
       const txhash = await deposit({ amount: 0.1 });
-      console.log("txhash", txhash);
 
       // Track transaction with success actions
       trackTransaction(txhash, "Deposit 0.1 SOL", [
@@ -117,6 +138,8 @@ export default function Home() {
               </button>
             </div>
           )}
+
+          {connected && <AccountsPositionsPanel />}
         </div>
 
         <div className="md:col-span-4">
