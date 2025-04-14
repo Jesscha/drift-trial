@@ -4,16 +4,20 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useUserAccounts } from "./hooks/useUserAccounts";
 import { SettingsPanel } from "./components/settings";
 import { deposit } from "../services/drift/deposit";
-import { useDriftClient } from "./hooks/useDriftClient";
 import { useTransactions } from "./hooks/useTransactions";
 import { TransactionToasts } from "./components/TransactionToasts";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
-import { Modal } from "./components/Modal";
+import { Modal } from "./components/modal/Modal";
 import { useModal } from "./hooks/useModal";
 import { useParsedUserData } from "./hooks/useParsedUserData";
 import useSWR from "swr";
-import { BN } from "@drift-labs/sdk";
+import { BN, OrderType } from "@drift-labs/sdk";
 import { AccountsPositionsPanel } from "./components/AccountsPositionsPanel";
+import { TradingModal } from "./components/modal/TradingModal";
+import { useActiveAccount } from "./hooks/useActiveAccount";
+import { formatBN } from "./utils/number";
+import DriftThemeDemo from "./components/DriftThemeDemo";
+import ColorTest from "./components/ColorTest";
 
 const useTest = () => {
   const { data, error, isLoading } = useSWR(
@@ -41,6 +45,16 @@ export default function Home() {
 
   const { trackTransaction } = useTransactions();
   const { isOpen, open, close } = useModal(false);
+  const {
+    isOpen: isThemeOpen,
+    open: openTheme,
+    close: closeTheme,
+  } = useModal(false);
+  const {
+    isOpen: isColorTestOpen,
+    open: openColorTest,
+    close: closeColorTest,
+  } = useModal(false);
 
   const handleDeposit = async () => {
     try {
@@ -54,6 +68,8 @@ export default function Home() {
       console.error("Deposit failed:", error);
     }
   };
+
+  const { activeAccount, switchActiveAccount } = useActiveAccount();
 
   // Modal footer with action buttons
   const modalFooter = (
@@ -81,22 +97,44 @@ export default function Home() {
       {/* Transaction toast notifications */}
       <TransactionToasts />
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
         <div className="md:col-span-8">
-          <div className="bg-gray-800 rounded-lg p-4 mb-6 text-white">
+          <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-4 mb-6 text-neutrals-100 dark:text-neutrals-10">
             <h2 className="text-xl font-bold mb-4">Drift Protocol Dashboard</h2>
-            <p className="mb-4">
+            <p className="mb-4 text-neutrals-60 dark:text-neutrals-30">
               Welcome to the Drift Protocol trading dashboard. Connect your
               wallet to start trading.
             </p>
             {connected && publicKey && (
-              <div className="p-3 bg-gray-700 rounded">
+              <div className="p-3 bg-neutrals-20 dark:bg-neutrals-70 rounded">
                 <p>
                   Connected:{" "}
                   <span className="font-mono">{publicKey.toString()}</span>
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Color Test Box */}
+          <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-4 mb-6 text-neutrals-100 dark:text-neutrals-10">
+            <h2 className="text-xl font-bold mb-4">Color Tests</h2>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="p-2 bg-neutrals-10 dark:bg-neutrals-70">
+                neutrals-10/70
+              </div>
+              <div className="p-2 bg-neutrals-20 dark:bg-neutrals-80">
+                neutrals-20/80
+              </div>
+              <div className="p-2 bg-purple-50 text-white">purple-50</div>
+              <div className="p-2 bg-red-50 text-white">red-50</div>
+              <div className="p-2 bg-green-50 text-white">green-50</div>
+            </div>
+            <button
+              onClick={openColorTest}
+              className="bg-purple-50 hover:bg-purple-60 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              Open Full Color Test
+            </button>
           </div>
 
           {isLoading && (
@@ -148,51 +186,46 @@ export default function Home() {
         <div className="md:col-span-12 flex space-x-4">
           <button
             onClick={handleDeposit}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-purple-50 hover:bg-purple-60 text-white px-4 py-2 rounded-md transition-colors"
           >
             Deposit 0.1 SOL
           </button>
           <button
             onClick={open}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            className="bg-green-50 hover:bg-green-60 text-white px-4 py-2 rounded-md transition-colors"
           >
             Open Modal
+          </button>
+          <button
+            onClick={openTheme}
+            className="bg-primary-gradient text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+          >
+            View Drift Theme Demo
           </button>
         </div>
       </div>
 
-      {/* Modal */}
-      <Modal
+      <div>
+        <p>
+          Active Account: {activeAccount?.user?.userAccountPublicKey.toString()}
+        </p>
+        <p>Active Account ID: {activeAccount?.activeId}</p>
+        {/* free collateral */}
+        <p>Free Collateral: {formatBN(activeAccount?.freeCollateral, true)}</p>
+      </div>
+
+      <button onClick={() => switchActiveAccount(1)}>
+        Switch to Account 1
+      </button>
+
+      {/* Trading Modal */}
+      <TradingModal
+        marketIndex={0}
+        orderDirection="long"
+        orderType={"limit"}
         isOpen={isOpen}
         onClose={close}
-        title="Drift Protocol Modal"
-        footer={modalFooter}
-      >
-        <div className="space-y-4">
-          <p className="text-gray-300">
-            This is your Drift Protocol modal. You can add any content here
-            related to your blockchain operations.
-          </p>
-
-          <div className="bg-gray-700 p-4 rounded">
-            <h3 className="font-medium text-white mb-2">Blockchain Actions:</h3>
-            <ul className="list-disc list-inside text-gray-300 space-y-1">
-              <li>Execute smart contract transactions</li>
-              <li>View transaction history</li>
-              <li>Manage token approvals</li>
-              <li>Configure blockchain settings</li>
-            </ul>
-          </div>
-
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Enter transaction amount"
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-      </Modal>
+      />
     </main>
   );
 }

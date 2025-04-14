@@ -49,18 +49,22 @@ export function TransactionToast({
   if (!isVisible) return null;
 
   // Determine status color and label
-  let statusColor = "bg-yellow-500";
+  let statusBg = "bg-yellow-50 dark:bg-yellow-90";
   let statusText = "Processing...";
+  let statusTextColor = "text-yellow-80 dark:text-yellow-30";
 
   if (status === "confirmed") {
-    statusColor = "bg-green-500";
+    statusBg = "bg-green-20 dark:bg-green-90";
     statusText = "Confirmed";
+    statusTextColor = "text-green-70 dark:text-green-30";
   } else if (status === "failed") {
-    statusColor = "bg-red-500";
+    statusBg = "bg-red-20 dark:bg-red-90";
     statusText = "Failed";
+    statusTextColor = "text-red-70 dark:text-red-30";
   } else if (status === "pending") {
-    statusColor = "bg-blue-500";
+    statusBg = "bg-lightBlue-20 dark:bg-lightBlue-90";
     statusText = "Pending";
+    statusTextColor = "text-lightBlue-70 dark:text-lightBlue-30";
   }
 
   // Format timestamp
@@ -84,20 +88,24 @@ export function TransactionToast({
 
   return (
     <div
-      className={`${statusColor} text-white p-3 rounded-md shadow-md mb-3 max-w-sm
+      className={`${statusBg} ${statusTextColor} p-3 rounded-md shadow-md mb-3 max-w-sm
         ${isExiting ? "animate-toast-out" : "animate-toast-in"}`}
     >
       <div className="flex justify-between items-start">
         <div>
           <div className="font-bold mb-1">{description}</div>
-          <div className="text-sm mb-1">Status: {statusText}</div>
-          <div className="text-xs mb-1">
+          <div className="text-sm mb-1 text-neutrals-90 dark:text-neutrals-20">
+            Status: {statusText}
+          </div>
+          <div className="text-xs mb-1 text-neutrals-80 dark:text-neutrals-30">
             Signature:{" "}
             <span className="font-mono">{truncateSignature(signature)}</span>
           </div>
-          <div className="text-xs opacity-70">{formatTime(timestamp)}</div>
+          <div className="text-xs opacity-70 text-neutrals-70 dark:text-neutrals-40">
+            {formatTime(timestamp)}
+          </div>
           {error && (
-            <div className="text-xs mt-2 bg-red-800 p-1 rounded overflow-hidden overflow-ellipsis">
+            <div className="text-xs mt-2 bg-red-20 dark:bg-red-90 text-red-70 dark:text-red-30 p-1 rounded overflow-hidden overflow-ellipsis">
               {error}
             </div>
           )}
@@ -105,7 +113,7 @@ export function TransactionToast({
         <div className="flex flex-col space-y-2">
           <button
             onClick={handleClose}
-            className="text-white hover:text-gray-200 text-xs font-bold"
+            className="text-neutrals-70 dark:text-neutrals-40 hover:text-neutrals-100 dark:hover:text-neutrals-0 text-xs font-bold transition-colors"
           >
             ✕
           </button>
@@ -114,7 +122,7 @@ export function TransactionToast({
               href={`https://explorer.solana.com/tx/${signature}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs underline hover:text-gray-200"
+              className="text-xs text-purple-50 hover:text-purple-60 underline transition-colors"
             >
               View
             </a>

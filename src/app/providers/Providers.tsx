@@ -16,6 +16,7 @@ import {
   Coin98WalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { DriftClientProvider } from "@/app/providers/DriftClientProvider";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -38,7 +39,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={true}>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          <DriftClientProvider>{children}</DriftClientProvider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

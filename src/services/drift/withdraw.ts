@@ -1,17 +1,17 @@
 import driftService from "./client";
 
-export interface DepositParams {
+export interface WithdrawParams {
   amount: number;
   marketIndex?: number; // Default to USDC (0)
+  reduceOnly?: boolean;
   subAccountId?: number; // Optional subaccount ID
-  reduceOnly?: boolean; // Optional reduceOnly flag
 }
 
-export const deposit = async (params: DepositParams) => {
+export const withdraw = async (params: WithdrawParams) => {
   const client = driftService.getClient();
   if (!client) throw new Error("Drift client not initialized");
 
-  const { amount, subAccountId, reduceOnly = false } = params;
+  const { amount, reduceOnly = false, subAccountId } = params;
   const marketIndex = params.marketIndex || 0; // Default to USDC market
 
   // Convert amount to spot precision
@@ -22,13 +22,13 @@ export const deposit = async (params: DepositParams) => {
     marketIndex
   );
 
-  // Execute deposit - parameter order from SDK:
-  // amount, marketIndex, associatedTokenAccount, subAccountId, reduceOnly, txParams
-  return await client.deposit(
+  // Execute withdrawal - parameter order from SDK:
+  // amount, marketIndex, associatedTokenAddress, reduceOnly, subAccountId, txParams, updateFuel
+  return await client.withdraw(
     convertedAmount,
     marketIndex,
     associatedTokenAccount,
-    subAccountId,
-    reduceOnly
+    reduceOnly,
+    subAccountId
   );
 };

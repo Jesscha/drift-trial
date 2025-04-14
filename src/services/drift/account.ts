@@ -24,3 +24,23 @@ export const getAllUsers = async (publicKey: PublicKey) => {
 
   return users;
 };
+
+export const switchActiveUser = async (index: number) => {
+  const client = driftService.getClient();
+  if (!client) throw new Error("Drift client not initialized");
+  await client.switchActiveUser(index);
+};
+
+export const getActiveAccount = () => {
+  const client = driftService.getClient();
+  if (!client) throw new Error("Drift client not initialized");
+  const user = client.getUser();
+
+  return user;
+};
+
+export const getActiveAccountId = () => {
+  const client = driftService.getClient();
+  if (!client) throw new Error("Drift client not initialized");
+  return client.activeSubAccountId;
+};

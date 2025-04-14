@@ -3,10 +3,9 @@ import React, { useEffect, useRef } from "react";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string | React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 export function Modal({
@@ -15,11 +14,8 @@ export function Modal({
   title,
   children,
   footer,
-  maxWidth = "md",
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-
-  // Close modal when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -29,8 +25,6 @@ export function Modal({
         onClose();
       }
     }
-
-    // Only add listener if modal is open
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -40,7 +34,6 @@ export function Modal({
     };
   }, [isOpen, onClose]);
 
-  // Close on ESC key press
   useEffect(() => {
     function handleEscapeKey(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -57,7 +50,6 @@ export function Modal({
     };
   }, [isOpen, onClose]);
 
-  // Prevent body scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -72,39 +64,41 @@ export function Modal({
 
   if (!isOpen) return null;
 
-  // Map maxWidth prop to Tailwind class
-  const maxWidthClass = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    "2xl": "max-w-2xl",
-    full: "max-w-full",
-  }[maxWidth];
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
         ref={modalRef}
-        className={`bg-gray-800 rounded-lg shadow-xl ${maxWidthClass} w-full mx-4 overflow-hidden animate-scale-in`}
+        className={`bg-neutrals-0 dark:bg-neutrals-80 rounded-lg shadow-xl w-fit mx-4 overflow-hidden animate-scale-in relative`}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-lg font-bold text-white">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white focus:outline-none"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
+        {/* Close button that always appears */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-neutrals-60 hover:text-neutrals-100 dark:text-neutrals-40 dark:hover:text-neutrals-0 focus:outline-none transition-colors z-10"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        {/* Header - Only render if title exists */}
+        {title && (
+          <div className="flex justify-between items-center p-2 border-b border-neutrals-20 dark:border-neutrals-70">
+            <h2 className="text-lg font-bold text-neutrals-100 dark:text-neutrals-0 flex items-center pr-6">
+              {title}
+            </h2>
+          </div>
+        )}
 
         {/* Body */}
-        <div className="p-4 max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="p-4 max-h-[70vh] overflow-y-auto text-neutrals-100 dark:text-neutrals-10">
+          {children}
+        </div>
 
         {/* Footer */}
-        {footer && <div className="p-4 border-t border-gray-700">{footer}</div>}
+        {footer && (
+          <div className="p-4 border-t border-neutrals-20 dark:border-neutrals-70">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,10 +14,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            (function() {
+              // On page load or when changing themes, best to add inline in \`head\` to avoid FOUC
+              if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            })()
+          `,
+          }}
+        />
+      </head>
       <body>
         <Providers>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen bg-neutrals-0 dark:bg-neutrals-90 text-neutrals-100 dark:text-neutrals-0">
             <Header />
             <main className="flex-grow">{children}</main>
           </div>
