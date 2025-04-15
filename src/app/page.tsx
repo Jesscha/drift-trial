@@ -11,7 +11,7 @@ import { useModal } from "./hooks/useModal";
 import useSWR from "swr";
 import { AccountsPositionsPanel } from "./components/AccountsPositionsPanel";
 import { TradingModal } from "./components/modal/TradingModal";
-import { useActiveAccount } from "./hooks/useActiveAccount";
+import { useActiveAccount } from "./providers/ActiveAccountProvider";
 import { formatBN } from "./utils/number";
 import { PositionDirection } from "@drift-labs/sdk";
 
@@ -68,7 +68,7 @@ export default function Home() {
     switchActiveAccount,
     getUserAccountPublicKey,
     getFreeCollateral,
-    activeId: getActiveId,
+    activeAccountId,
   } = useActiveAccount();
 
   // Modal footer with action buttons
@@ -207,7 +207,7 @@ export default function Home() {
 
       <div>
         <p>Active Account: {getUserAccountPublicKey()?.toString()}</p>
-        <p>Active Account ID: {getActiveId()}</p>
+        <p>Active Account ID: {activeAccountId}</p>
         {/* free collateral */}
         <p>Free Collateral: {formatBN(getFreeCollateral(), true)}</p>
       </div>

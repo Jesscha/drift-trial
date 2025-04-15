@@ -31,3 +31,32 @@ export const formatBN = (
   // Only add decimal point if there are decimal digits
   return decimalPart ? `${formattedWhole}.${decimalPart}` : formattedWhole;
 };
+
+export const formatNumber = (
+  num: number | null,
+  isUSDValue = false,
+  decimals = 2
+): string => {
+  if (num === null) return "N/A";
+
+  // Format with the specified number of decimal places
+  const formatted = num.toFixed(decimals);
+
+  // Split into whole and decimal parts
+  const [wholeStr, decimalStr] = formatted.split(".");
+
+  // Add commas for thousands
+  const formattedWhole = wholeStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  if (decimals === 0) {
+    return formattedWhole;
+  }
+
+  // Remove trailing zeros from decimal part
+  const cleanedDecimal = decimalStr ? decimalStr.replace(/0+$/, "") : "";
+
+  // Only add decimal point if there are decimal digits
+  return cleanedDecimal
+    ? `${formattedWhole}.${cleanedDecimal}`
+    : formattedWhole;
+};

@@ -18,6 +18,7 @@ import {
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { DriftClientProvider } from "@/app/providers/DriftClientProvider";
 import { TransactionProvider } from "@/app/providers/TransactionProvider";
+import { ActiveAccountProvider } from "@/app/providers/ActiveAccountProvider";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -42,7 +43,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
       <WalletProvider wallets={wallets} autoConnect={true}>
         <WalletModalProvider>
           <DriftClientProvider>
-            <TransactionProvider>{children}</TransactionProvider>
+            <ActiveAccountProvider>
+              <TransactionProvider>{children}</TransactionProvider>
+            </ActiveAccountProvider>
           </DriftClientProvider>
         </WalletModalProvider>
       </WalletProvider>

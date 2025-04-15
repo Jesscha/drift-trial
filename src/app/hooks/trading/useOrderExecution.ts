@@ -13,9 +13,9 @@ export const useOrderExecution = (
   marketIndex: number,
   onOrderConfirmed: () => void
 ) => {
-  const sizeBN = useTradingStore((state) => state.sizeBN);
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const triggerPriceBN = useTradingStore((state) => state.triggerPriceBN);
+  const size = useTradingStore((state) => state.size);
+  const price = useTradingStore((state) => state.price);
+  const triggerPrice = useTradingStore((state) => state.triggerPrice);
   const triggerCondition = useTradingStore((state) => state.triggerCondition);
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
   const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
@@ -75,12 +75,10 @@ export const useOrderExecution = (
 
   // Execute order after confirmation
   const executeOrder = useCallback(async () => {
-    // Convert BN to number for SDK
-    const sizeNum = parseFloat(sizeBN.toString()) / 1e6;
-    const priceNum = priceBN ? parseFloat(priceBN.toString()) / 1e6 : undefined;
-    const triggerPriceNum = triggerPriceBN
-      ? parseFloat(triggerPriceBN.toString()) / 1e6
-      : undefined;
+    // No need to convert from BN, numbers are already in the correct format
+    const sizeNum = size;
+    const priceNum = price ?? undefined;
+    const triggerPriceNum = triggerPrice ?? undefined;
     const direction =
       selectedDirection === "long"
         ? PositionDirection.LONG
@@ -229,9 +227,9 @@ export const useOrderExecution = (
     }
   }, [
     marketIndex,
-    sizeBN,
-    priceBN,
-    triggerPriceBN,
+    size,
+    price,
+    triggerPrice,
     triggerCondition,
     selectedDirection,
     selectedOrderType,
@@ -268,11 +266,11 @@ export const useOrderExecution = (
   const isButtonDisabled =
     isOrderLoading ||
     orderSubmitted ||
-    sizeBN.isZero() ||
-    (selectedCustomOrderType !== OrderTypeOption.MARKET && !priceBN) ||
-    (isMarketTriggerOrderType(selectedCustomOrderType) && !triggerPriceBN) ||
+    size === 0 ||
+    (selectedCustomOrderType !== OrderTypeOption.MARKET && !price) ||
+    (isMarketTriggerOrderType(selectedCustomOrderType) && !triggerPrice) ||
     (isLimitTriggerOrderType(selectedCustomOrderType) &&
-      (!triggerPriceBN || !priceBN));
+      (!triggerPrice || price === 0));
 
   // Close modal when transaction is confirmed
   useEffect(() => {

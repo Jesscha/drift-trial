@@ -1,7 +1,7 @@
-import { BN } from "@drift-labs/sdk";
+import { PositionDirection } from "@drift-labs/sdk";
 import { useCallback } from "react";
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
-import { formatBN } from "@/app/utils/number";
+import { formatNumber } from "@/app/utils/number";
 import {
   OrderTypeOption,
   formatMarketName,
@@ -34,9 +34,9 @@ export const OrderConfirmationModal = ({
   marketIndex,
 }: OrderConfirmationModalProps) => {
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
-  const sizeBN = useTradingStore((state) => state.sizeBN);
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const triggerPriceBN = useTradingStore((state) => state.triggerPriceBN);
+  const size = useTradingStore((state) => state.size);
+  const price = useTradingStore((state) => state.price);
+  const triggerPrice = useTradingStore((state) => state.triggerPrice);
   const triggerCondition = useTradingStore((state) => state.triggerCondition);
   const enableTakeProfit = useTradingStore((state) => state.enableTakeProfit);
   const takeProfitPrice = useTradingStore((state) => state.takeProfitPrice);
@@ -50,15 +50,13 @@ export const OrderConfirmationModal = ({
   const selectedCustomOrderType = useTradingStore(
     (state) => state.selectedCustomOrderType
   );
-  const usdValueBN = useTradingStore((state) => state.usdValueBN);
+  const usdValue = useTradingStore((state) => state.usdValue);
 
   // Function to get formatted order type description for confirmation modal
   const getOrderDescription = useCallback(() => {
     const baseDescription = `${
-      selectedDirection === "long" ? "Buy" : "Sell"
-    } ${formatBN(sizeBN.div(new BN(1e6)))} ${formatMarketName(
-      marketsList[marketIndex]?.name
-    )}`;
+      selectedDirection === PositionDirection.LONG ? "Buy" : "Sell"
+    } ${size.toFixed(5)} ${formatMarketName(marketsList[marketIndex]?.name)}`;
 
     let detailDescription = "";
     let additionalNotes = "";
@@ -66,11 +64,11 @@ export const OrderConfirmationModal = ({
     if (
       useScaleOrders &&
       selectedCustomOrderType === OrderTypeOption.LIMIT &&
-      priceBN
+      price
     ) {
-      const priceNum = parseFloat(priceBN.toString()) / 1e6;
-      const minPriceVal = minPrice !== null ? minPrice : priceNum * 0.95;
-      const maxPriceVal = maxPrice !== null ? maxPrice : priceNum * 1.05;
+      const priceVal = price;
+      const minPriceVal = minPrice !== null ? minPrice : priceVal * 0.95;
+      const maxPriceVal = maxPrice !== null ? maxPrice : priceVal * 1.05;
 
       const distributionText =
         scaleDistribution === "ascending"
@@ -88,56 +86,47 @@ export const OrderConfirmationModal = ({
           detailDescription = "at Market";
           break;
         case OrderTypeOption.LIMIT:
-          detailDescription = priceBN
-            ? `Limit at ${parseFloat(priceBN.toString()) / 1e6}`
-            : "";
+          detailDescription = price ? `Limit at ${price}` : "";
           break;
         case OrderTypeOption.STOP_MARKET:
           detailDescription =
-            triggerPriceBN && triggerCondition !== undefined
+            triggerPrice && triggerCondition !== undefined
               ? `Stop Market when ${
                   triggerCondition === TriggerCondition.ABOVE
                     ? "Above"
                     : "Below"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
+                } ${triggerPrice}`
               : "";
           break;
         case OrderTypeOption.STOP_LIMIT:
           detailDescription =
-            triggerPriceBN && priceBN
-              ? `Stop Limit ${parseFloat(priceBN.toString()) / 1e6} when ${
+            triggerPrice && price
+              ? `Stop Limit ${price} when ${
                   triggerCondition === TriggerCondition.ABOVE
                     ? "Above"
                     : "Below"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
+                } ${triggerPrice}`
               : "";
           break;
         case OrderTypeOption.TAKE_PROFIT:
           detailDescription =
-            triggerPriceBN && triggerCondition !== undefined
+            triggerPrice && triggerCondition !== undefined
               ? `Take Profit when ${
                   triggerCondition === TriggerCondition.ABOVE
                     ? "Above"
                     : "Below"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
+                } ${triggerPrice}`
               : "";
           break;
         case OrderTypeOption.TAKE_PROFIT_LIMIT:
           detailDescription =
-            triggerPriceBN && priceBN
-              ? `Take Profit Limit ${
-                  parseFloat(priceBN.toString()) / 1e6
-                } when ${
+            triggerPrice && price
+              ? `Take Profit Limit ${price} when ${
                   triggerCondition === TriggerCondition.ABOVE
                     ? "Above"
                     : "Below"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
+                } ${triggerPrice}`
               : "";
-          break;
-        case OrderTypeOption.ORACLE_LIMIT:
-          detailDescription = priceBN
-            ? `Oracle Limit at ${parseFloat(priceBN.toString()) / 1e6}`
-            : "";
           break;
         default:
           detailDescription = "";
@@ -153,10 +142,10 @@ export const OrderConfirmationModal = ({
         const tpPrice =
           takeProfitPrice !== null
             ? takeProfitPrice
-            : priceBN && selectedDirection === "long"
-            ? (parseFloat(priceBN.toString()) / 1e6) * 1.1
-            : priceBN
-            ? (parseFloat(priceBN.toString()) / 1e6) * 0.9
+            : price && selectedDirection === PositionDirection.LONG
+            ? price * 1.1
+            : price
+            ? price * 0.9
             : 0;
 
         additionalNotes += ` with Take Profit at ${tpPrice}`;
@@ -166,10 +155,10 @@ export const OrderConfirmationModal = ({
         const slPrice =
           stopLossPrice !== null
             ? stopLossPrice
-            : priceBN && selectedDirection === "long"
-            ? (parseFloat(priceBN.toString()) / 1e6) * 0.9
-            : priceBN
-            ? (parseFloat(priceBN.toString()) / 1e6) * 1.1
+            : price && selectedDirection === PositionDirection.LONG
+            ? price * 0.9
+            : price
+            ? price * 1.1
             : 0;
 
         additionalNotes += `${
@@ -181,12 +170,12 @@ export const OrderConfirmationModal = ({
     return `${baseDescription} ${detailDescription}${additionalNotes}`;
   }, [
     selectedDirection,
-    sizeBN,
+    size,
     marketsList,
     marketIndex,
     selectedCustomOrderType,
-    priceBN,
-    triggerPriceBN,
+    price,
+    triggerPrice,
     triggerCondition,
     enableTakeProfit,
     takeProfitPrice,
@@ -201,8 +190,8 @@ export const OrderConfirmationModal = ({
 
   // Get notional value in USD
   const getNotionalValue = useCallback(() => {
-    return `${formatBN(usdValueBN, true, 2)} USD`;
-  }, [usdValueBN]);
+    return `${formatNumber(usdValue, true, 2)} USD`;
+  }, [usdValue]);
 
   if (!showConfirmation) return null;
 
@@ -285,12 +274,13 @@ export const OrderConfirmationModal = ({
                 onConfirm();
               }}
               className={`flex-1 py-3 rounded-lg font-medium text-white transition-colors ${
-                selectedDirection === "long"
+                selectedDirection === PositionDirection.LONG
                   ? "bg-green-60 hover:bg-green-70"
                   : "bg-red-60 hover:bg-red-70"
               }`}
             >
-              Confirm {selectedDirection === "long" ? "Buy" : "Sell"}
+              Confirm{" "}
+              {selectedDirection === PositionDirection.LONG ? "Buy" : "Sell"}
             </button>
           </div>
         </div>

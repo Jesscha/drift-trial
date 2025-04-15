@@ -1,5 +1,4 @@
-import { BN } from "@drift-labs/sdk";
-import { formatBN } from "@/app/utils/number";
+import { formatNumber } from "@/app/utils/number";
 import { formatMarketName } from "../modal/TradingModal.util";
 import { PercentageSlider } from "../PercentageSlider";
 import { useOrderSize } from "@/app/hooks/trading";
@@ -15,8 +14,8 @@ export const OrderSizeInputs = ({
   marketIndex,
 }: OrderSizeInputsProps) => {
   const {
-    sizeBN,
-    usdValueBN,
+    size,
+    usdValue,
     sizePercentage,
     maxPositionSize,
     atMaxValue,
@@ -26,8 +25,8 @@ export const OrderSizeInputs = ({
     handleUsdValueChange,
   } = useOrderSize(marketIndex);
 
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const isDisabled = priceBN && priceBN.isZero();
+  const price = useTradingStore((state) => state.price);
+  const isDisabled = price === 0;
 
   return (
     <div>
@@ -39,7 +38,8 @@ export const OrderSizeInputs = ({
           className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-80 rounded-full border border-neutrals-30/30 text-neutrals-60 dark:text-neutrals-40 cursor-pointer"
           onClick={handleSetMaxSize}
         >
-          Max: {maxPositionSize ? formatBN(maxPositionSize, true) : "0.00"} USD
+          Max: {maxPositionSize ? formatNumber(maxPositionSize, true) : "0.00"}{" "}
+          USD
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -52,7 +52,9 @@ export const OrderSizeInputs = ({
         >
           <input
             type="number"
-            value={parseFloat(sizeBN.toString()) / 1e6}
+            value={
+              size !== null && size !== undefined ? size.toFixed(5) : "0.00000"
+            }
             onChange={(e) => handleSizeChange(e.target.value)}
             className={`w-full h-10 px-3 py-2 bg-transparent text-sm ${
               atMaxValue
@@ -78,7 +80,11 @@ export const OrderSizeInputs = ({
         >
           <input
             type="number"
-            value={parseFloat(usdValueBN.toString()) / 1e6}
+            value={
+              usdValue !== null && usdValue !== undefined
+                ? usdValue.toFixed(2)
+                : "0.00"
+            }
             onChange={(e) => handleUsdValueChange(e.target.value)}
             className={`w-full h-10 px-3 py-2 bg-transparent text-sm ${
               atMaxValue

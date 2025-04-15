@@ -25,15 +25,18 @@ export const useOrderType = (marketIndex: number) => {
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
   const activeTab = useTradingStore((state) => state.activeTab);
   const setActiveTab = useTradingStore((state) => state.setActiveTab);
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const setPriceBN = useTradingStore((state) => state.setPriceBN);
-  const triggerPriceBN = useTradingStore((state) => state.triggerPriceBN);
-  const setTriggerPriceBN = useTradingStore((state) => state.setTriggerPriceBN);
+  const price = useTradingStore((state) => state.price);
+  const setPrice = useTradingStore((state) => state.setPrice);
+  const triggerPrice = useTradingStore((state) => state.triggerPrice);
+  const setTriggerPrice = useTradingStore((state) => state.setTriggerPrice);
   const setTriggerCondition = useTradingStore(
     (state) => state.setTriggerCondition
   );
 
-  const { oraclePrice } = useOraclePrice(marketIndex);
+  const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
+  const oraclePrice = oraclePriceBN
+    ? parseFloat(oraclePriceBN.toString()) / 1e6
+    : null;
 
   // Create a ref to track the previous activeTab value
   const prevActiveTabRef = useRef<OrderTypeOption | null>(null);
@@ -68,14 +71,14 @@ export const useOrderType = (marketIndex: number) => {
       setSelectedOrderType(sdkOrderType);
 
       if (activeTab === OrderTypeOption.MARKET) {
-        setPriceBN(null);
-      } else if (isLimitOrderType(activeTab) && !priceBN && oraclePrice) {
-        setPriceBN(oraclePrice);
+        setPrice(null);
+      } else if (isLimitOrderType(activeTab) && !price && oraclePrice) {
+        setPrice(oraclePrice);
       }
 
       // For trigger orders, initialize trigger price to oracle price if not set
-      if (isTriggerOrderType(activeTab) && !triggerPriceBN && oraclePrice) {
-        setTriggerPriceBN(oraclePrice);
+      if (isTriggerOrderType(activeTab) && !triggerPrice && oraclePrice) {
+        setTriggerPrice(oraclePrice);
         setTriggerCondition(
           getDefaultTriggerCondition(activeTab, selectedDirection)
         );
@@ -84,12 +87,12 @@ export const useOrderType = (marketIndex: number) => {
   }, [
     activeTab,
     oraclePrice,
-    priceBN,
-    triggerPriceBN,
+    price,
+    triggerPrice,
     selectedDirection,
     setSelectedOrderType,
-    setPriceBN,
-    setTriggerPriceBN,
+    setPrice,
+    setTriggerPrice,
     setTriggerCondition,
   ]);
 

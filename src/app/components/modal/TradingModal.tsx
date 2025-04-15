@@ -19,7 +19,7 @@ import { OrderSizeInputs } from "@/app/components/trading/OrderSizeInputs";
 import { OrderDirectionToggle } from "@/app/components/trading/OrderDirectionToggle";
 import { OrderTypeTabs } from "@/app/components/trading/OrderTypeTabs";
 import { ScaleOrdersSection } from "@/app/components/trading/ScaleOrdersSection";
-import { TakeProfitStopLossSection } from "@/app/components/TakeProfitStopLossSection";
+import { TakeProfitStopLossSection } from "@/app/components/trading/TakeProfitStopLossSection";
 import { TriggerConditionDropdown } from "@/app/components/trading/TriggerConditionDropdown";
 import { OrderInputSection } from "../trading/OrderInputSection";
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { OrderType, PositionDirection, BN } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import {
   OrderTypeOption,
@@ -8,9 +8,9 @@ import {
 
 interface TradingState {
   // Order size and price state
-  sizeBN: BN;
-  priceBN: BN | null;
-  usdValueBN: BN;
+  size: number;
+  price: number | null;
+  usdValue: number;
   sizePercentage: number;
 
   // Order type state
@@ -19,7 +19,7 @@ interface TradingState {
   selectedDirection: PositionDirection;
 
   // Trigger order state
-  triggerPriceBN: BN | null;
+  triggerPrice: number | null;
   triggerCondition: TriggerCondition;
 
   // Scale orders state
@@ -49,16 +49,16 @@ interface TradingState {
   activeTab: OrderTypeOption;
 
   // Actions
-  setSizeBN: (size: BN) => void;
-  setPriceBN: (price: BN | null) => void;
-  setUsdValueBN: (value: BN) => void;
+  setSize: (size: number) => void;
+  setPrice: (price: number | null) => void;
+  setUsdValue: (value: number) => void;
   setSizePercentage: (percentage: number) => void;
 
   setSelectedOrderType: (orderType: OrderType) => void;
   setSelectedCustomOrderType: (orderType: OrderTypeOption) => void;
   setSelectedDirection: (direction: PositionDirection) => void;
 
-  setTriggerPriceBN: (price: BN | null) => void;
+  setTriggerPrice: (price: number | null) => void;
   setTriggerCondition: (condition: number) => void;
 
   setUseScaleOrders: (use: boolean) => void;
@@ -98,16 +98,16 @@ interface TradingState {
 
 export const useTradingStore = create<TradingState>((set) => ({
   // Initial values
-  sizeBN: new BN(1).mul(new BN(1e6)),
-  priceBN: null,
-  usdValueBN: new BN(0),
+  size: 1.0,
+  price: null,
+  usdValue: 0,
   sizePercentage: 50,
 
   selectedOrderType: OrderType.MARKET,
   selectedCustomOrderType: OrderTypeOption.MARKET,
   selectedDirection: PositionDirection.LONG,
 
-  triggerPriceBN: null,
+  triggerPrice: null,
   triggerCondition: TriggerCondition.ABOVE,
 
   useScaleOrders: false,
@@ -133,9 +133,9 @@ export const useTradingStore = create<TradingState>((set) => ({
   activeTab: OrderTypeOption.MARKET,
 
   // Simple setter actions
-  setSizeBN: (size) => set({ sizeBN: size }),
-  setPriceBN: (price) => set({ priceBN: price }),
-  setUsdValueBN: (value) => set({ usdValueBN: value }),
+  setSize: (size) => set({ size }),
+  setPrice: (price) => set({ price }),
+  setUsdValue: (usdValue) => set({ usdValue }),
   setSizePercentage: (percentage) => set({ sizePercentage: percentage }),
 
   setSelectedOrderType: (orderType) => set({ selectedOrderType: orderType }),
@@ -143,7 +143,7 @@ export const useTradingStore = create<TradingState>((set) => ({
     set({ selectedCustomOrderType: orderType }),
   setSelectedDirection: (direction) => set({ selectedDirection: direction }),
 
-  setTriggerPriceBN: (price) => set({ triggerPriceBN: price }),
+  setTriggerPrice: (price) => set({ triggerPrice: price }),
   setTriggerCondition: (condition) => set({ triggerCondition: condition }),
 
   setUseScaleOrders: (use) => set({ useScaleOrders: use }),
@@ -173,7 +173,7 @@ export const useTradingStore = create<TradingState>((set) => ({
   // Initialize state
   initializeState: (orderSize, initialOrderType, initialOrderDirection) =>
     set({
-      sizeBN: new BN(orderSize || 1).mul(new BN(1e6)),
+      size: orderSize || 1,
       selectedOrderType: initialOrderType || OrderType.MARKET,
       selectedDirection: initialOrderDirection || PositionDirection.LONG,
       activeTab: initialOrderType

@@ -3,12 +3,12 @@ import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   isTriggerOrderType,
   mapSDKToUIOrderType,
-} from "./modal/TradingModal.util";
+} from "../modal/TradingModal.util";
 
 export const TakeProfitStopLossSection = () => {
   // Get TP/SL related state and functions directly from the store
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
-  const priceBN = useTradingStore((state) => state.priceBN);
+  const price = useTradingStore((state) => state.price);
 
   // Take Profit state
   const enableTakeProfit = useTradingStore((state) => state.enableTakeProfit);
@@ -145,10 +145,10 @@ export const TakeProfitStopLossSection = () => {
                         value={
                           takeProfitPrice !== null
                             ? takeProfitPrice
-                            : priceBN
+                            : price
                             ? (selectedDirection === "long"
-                                ? (parseFloat(priceBN.toString()) / 1e6) * 1.1
-                                : (parseFloat(priceBN.toString()) / 1e6) * 0.9
+                                ? price * 1.1
+                                : price * 0.9
                               ).toFixed(2)
                             : ""
                         }
@@ -251,10 +251,10 @@ export const TakeProfitStopLossSection = () => {
                         value={
                           stopLossPrice !== null
                             ? stopLossPrice
-                            : priceBN
+                            : price
                             ? (selectedDirection === "long"
-                                ? (parseFloat(priceBN.toString()) / 1e6) * 0.9
-                                : (parseFloat(priceBN.toString()) / 1e6) * 1.1
+                                ? price * 0.9
+                                : price * 1.1
                               ).toFixed(2)
                             : ""
                         }

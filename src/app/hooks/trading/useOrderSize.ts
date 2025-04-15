@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { BN } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import { useActiveAccount } from "@/app/hooks/useActiveAccount";
+import { useActiveAccount } from "@/app/providers/ActiveAccountProvider";
 import { useOraclePrice } from "@/app/hooks/useOraclePrice";
 import {
   calculateSize,
@@ -10,20 +9,23 @@ import {
 } from "@/app/components/modal/TradingModal.util";
 
 export const useOrderSize = (marketIndex: number) => {
-  const sizeBN = useTradingStore((state) => state.sizeBN);
-  const setSizeBN = useTradingStore((state) => state.setSizeBN);
-  const usdValueBN = useTradingStore((state) => state.usdValueBN);
-  const setUsdValueBN = useTradingStore((state) => state.setUsdValueBN);
+  const size = useTradingStore((state) => state.size);
+  const setSize = useTradingStore((state) => state.setSize);
+  const usdValue = useTradingStore((state) => state.usdValue);
+  const setUsdValue = useTradingStore((state) => state.setUsdValue);
   const sizePercentage = useTradingStore((state) => state.sizePercentage);
   const setSizePercentage = useTradingStore((state) => state.setSizePercentage);
-  const priceBN = useTradingStore((state) => state.priceBN);
+  const price = useTradingStore((state) => state.price);
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
 
   const { activeAccount, getMaxTradeSizeUSDCForPerp } = useActiveAccount();
-  const { oraclePrice } = useOraclePrice(marketIndex);
+  const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
+  const oraclePrice = oraclePriceBN
+    ? parseFloat(oraclePriceBN.toString()) / 1e6
+    : null;
 
   const calculateMaxPositionSize = useCallback(() => {
-    if (!activeAccount || !oraclePrice) return new BN(0);
+    if (!activeAccount || !oraclePrice) return 0;
 
     try {
       const maxSizeUsd = getMaxTradeSizeUSDCForPerp(
@@ -31,15 +33,17 @@ export const useOrderSize = (marketIndex: number) => {
         selectedDirection
       );
 
-      if (!maxSizeUsd) return new BN(0);
+      if (!maxSizeUsd) return 0;
 
-      const totalSize = maxSizeUsd.tradeSize.add(
-        maxSizeUsd.oppositeSideTradeSize
-      );
+      // Convert BN to number
+      const totalSize =
+        parseFloat(
+          maxSizeUsd.tradeSize.add(maxSizeUsd.oppositeSideTradeSize).toString()
+        ) / 1e6;
 
-      return totalSize || new BN(0);
+      return totalSize || 0;
     } catch (error) {
-      return new BN(0);
+      return 0;
     }
   }, [
     getMaxTradeSizeUSDCForPerp,
@@ -55,94 +59,83 @@ export const useOrderSize = (marketIndex: number) => {
   );
 
   // Check if we're at maximum value
-  const atMaxValue = isAtMaxValue(usdValueBN, maxPositionSize);
+  const atMaxValue = isAtMaxValue(usdValue, maxPositionSize);
 
   // Set size based on percentage of max size
   const handleSetSizePercentage = useCallback(
     (percentage: number) => {
       setSizePercentage(percentage);
 
-      if (maxPositionSize.gt(new BN(0)) && oraclePrice) {
+      if (maxPositionSize > 0 && oraclePrice) {
         // Calculate USD value based on percentage of max position size
-        const newUsdValue = maxPositionSize
-          .mul(new BN(percentage))
-          .div(new BN(100));
-        setUsdValueBN(newUsdValue);
+        const newUsdValue = maxPositionSize * (percentage / 100);
+        setUsdValue(newUsdValue);
 
         // Calculate new size based on USD value and price
         const newSize = calculateSize(newUsdValue, oraclePrice);
-        setSizeBN(newSize);
+        setSize(newSize);
       }
     },
-    [maxPositionSize, oraclePrice, setSizeBN, setUsdValueBN, setSizePercentage]
+    [maxPositionSize, oraclePrice, setSize, setUsdValue, setSizePercentage]
   );
 
   // Set size to maximum available
   const handleSetMaxSize = useCallback(() => {
-    if (maxPositionSize.gt(new BN(0)) && oraclePrice) {
+    if (maxPositionSize > 0 && oraclePrice) {
       // Set USD value to maximum position size
-      setUsdValueBN(maxPositionSize);
+      setUsdValue(maxPositionSize);
 
       // Calculate size based on USD value and price
       const maxSize = calculateSize(maxPositionSize, oraclePrice);
-      setSizeBN(maxSize);
+      setSize(maxSize);
 
       // Set percentage to 100%
       setSizePercentage(100);
     }
-  }, [
-    maxPositionSize,
-    oraclePrice,
-    setSizeBN,
-    setUsdValueBN,
-    setSizePercentage,
-  ]);
+  }, [maxPositionSize, oraclePrice, setSize, setUsdValue, setSizePercentage]);
 
   // Handle size change (from input)
   const handleSizeChange = useCallback(
     (newSizeStr: string) => {
       if (!newSizeStr || isNaN(parseFloat(newSizeStr))) {
-        setSizeBN(new BN(0));
-        setUsdValueBN(new BN(0));
+        setSize(0);
+        setUsdValue(0);
         setSizePercentage(0);
         return;
       }
 
-      const currentPrice = priceBN || oraclePrice;
+      const currentPrice = price || oraclePrice;
       if (!currentPrice) return;
 
-      // Convert string to BN with appropriate precision
-      let newSizeBN = new BN(Math.floor(parseFloat(newSizeStr) * 1e6));
+      // Parse input to number
+      let newSize = parseFloat(newSizeStr);
 
       // Calculate USD value based on new size and current price
-      let newUsdValue = calculateUsdValue(newSizeBN, currentPrice);
+      let newUsdValue = calculateUsdValue(newSize, currentPrice);
 
       // Check if the new USD value exceeds the maximum position size
-      if (maxPositionSize.gt(new BN(0)) && newUsdValue.gt(maxPositionSize)) {
+      if (maxPositionSize > 0 && newUsdValue > maxPositionSize) {
         // Cap the USD value to maximum position size
         newUsdValue = maxPositionSize;
         // Recalculate size based on capped USD value
-        newSizeBN = calculateSize(newUsdValue, currentPrice);
+        newSize = calculateSize(newUsdValue, currentPrice);
       }
 
-      setSizeBN(newSizeBN);
-      setUsdValueBN(newUsdValue);
+      setSize(newSize);
+      setUsdValue(newUsdValue);
 
       // Update percentage based on new USD value
-      if (maxPositionSize.gt(new BN(0))) {
-        const percentage = newUsdValue
-          .mul(new BN(100))
-          .div(maxPositionSize)
-          .toNumber();
+      if (maxPositionSize > 0) {
+        const percentage = (newUsdValue / maxPositionSize) * 100;
         setSizePercentage(Math.min(percentage, 100));
       }
     },
     [
       maxPositionSize,
       oraclePrice,
-      priceBN,
-      setSizeBN,
-      setUsdValueBN,
+      price,
+      setSize,
+      setUsdValue,
       setSizePercentage,
     ]
   );
@@ -151,87 +144,80 @@ export const useOrderSize = (marketIndex: number) => {
   const handleUsdValueChange = useCallback(
     (newUsdValueStr: string) => {
       if (!newUsdValueStr || isNaN(parseFloat(newUsdValueStr))) {
-        setUsdValueBN(new BN(0));
-        setSizeBN(new BN(0));
+        setUsdValue(0);
+        setSize(0);
         setSizePercentage(0);
         return;
       }
 
-      const currentPrice = priceBN || oraclePrice;
-      if (!currentPrice || currentPrice.isZero()) return;
+      const currentPrice = price || oraclePrice;
+      if (!currentPrice || currentPrice === 0) return;
 
-      // Convert string to BN with appropriate precision
-      let newUsdValueBN = new BN(Math.floor(parseFloat(newUsdValueStr) * 1e6));
+      // Parse input to number
+      let newUsdValue = parseFloat(newUsdValueStr);
 
       // Cap USD value to maximum position size
-      if (maxPositionSize.gt(new BN(0)) && newUsdValueBN.gt(maxPositionSize)) {
-        newUsdValueBN = maxPositionSize;
+      if (maxPositionSize > 0 && newUsdValue > maxPositionSize) {
+        newUsdValue = maxPositionSize;
       }
 
-      setUsdValueBN(newUsdValueBN);
+      setUsdValue(newUsdValue);
 
       // Calculate new size based on USD value and current price
-      const newSizeBN = calculateSize(newUsdValueBN, currentPrice);
-      setSizeBN(newSizeBN);
+      const newSize = calculateSize(newUsdValue, currentPrice);
+      setSize(newSize);
 
       // Update percentage based on new USD value
-      if (maxPositionSize.gt(new BN(0))) {
-        const percentage = newUsdValueBN
-          .mul(new BN(100))
-          .div(maxPositionSize)
-          .toNumber();
+      if (maxPositionSize > 0) {
+        const percentage = (newUsdValue / maxPositionSize) * 100;
         setSizePercentage(Math.min(percentage, 100));
       }
     },
     [
-      priceBN,
+      price,
       oraclePrice,
       maxPositionSize,
-      setSizeBN,
-      setUsdValueBN,
+      setSize,
+      setUsdValue,
       setSizePercentage,
     ]
   );
 
   // Update size and USD value when price changes
   const updateSizeAndUsdValue = useCallback(
-    (newPriceBN: BN) => {
+    (newPrice: number) => {
       // Recalculate USD value with new price
-      if (!sizeBN.isZero()) {
-        const newUsdValue = calculateUsdValue(sizeBN, newPriceBN);
-        setUsdValueBN(newUsdValue);
+      if (size !== 0) {
+        const newUsdValue = calculateUsdValue(size, newPrice);
+        setUsdValue(newUsdValue);
       }
     },
-    [sizeBN, setUsdValueBN]
+    [size, setUsdValue]
   );
 
-  // Initialize size and USD value
   const initializeSizeAndValue = useCallback(
     (initialSize?: number) => {
       if (oraclePrice) {
-        const initialSizeBN = new BN(initialSize || 1).mul(new BN(1e6));
-        setSizeBN(initialSizeBN);
+        const newSize = initialSize || 1;
+        setSize(newSize);
 
         // Calculate initial USD value based on size and oracle price
-        const initialUsdValue = initialSizeBN.mul(oraclePrice).div(new BN(1e6));
-        setUsdValueBN(initialUsdValue);
+        const initialUsdValue = calculateUsdValue(newSize, oraclePrice);
+        setUsdValue(initialUsdValue);
 
         // Calculate initial percentage based on USD value and max position size
-        if (maxPositionSize && maxPositionSize.gt(new BN(0))) {
-          const initialPercentage = initialUsdValue
-            .mul(new BN(100))
-            .div(maxPositionSize)
-            .toNumber();
+        if (maxPositionSize && maxPositionSize > 0) {
+          const initialPercentage = (initialUsdValue / maxPositionSize) * 100;
           setSizePercentage(Math.min(initialPercentage, 100));
         }
       }
     },
-    [oraclePrice, maxPositionSize, setSizeBN, setUsdValueBN, setSizePercentage]
+    [oraclePrice, maxPositionSize, setSize, setUsdValue, setSizePercentage]
   );
 
   return {
-    sizeBN,
-    usdValueBN,
+    size,
+    usdValue,
     sizePercentage,
     maxPositionSize,
     atMaxValue,

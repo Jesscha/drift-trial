@@ -1,14 +1,13 @@
 import { useCallback, useEffect } from "react";
-import { BN } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { useOraclePrice } from "../useOraclePrice";
 import { calculateTPSLPrices } from "@/app/components/modal/TradingModal.util";
 
 export const useOrderPrice = (marketIndex: number) => {
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const setPriceBN = useTradingStore((state) => state.setPriceBN);
-  const triggerPriceBN = useTradingStore((state) => state.triggerPriceBN);
-  const setTriggerPriceBN = useTradingStore((state) => state.setTriggerPriceBN);
+  const price = useTradingStore((state) => state.price);
+  const setPrice = useTradingStore((state) => state.setPrice);
+  const triggerPrice = useTradingStore((state) => state.triggerPrice);
+  const setTriggerPrice = useTradingStore((state) => state.setTriggerPrice);
   const triggerCondition = useTradingStore((state) => state.triggerCondition);
   const setTriggerCondition = useTradingStore(
     (state) => state.setTriggerCondition
@@ -20,16 +19,18 @@ export const useOrderPrice = (marketIndex: number) => {
   const maxPrice = useTradingStore((state) => state.maxPrice);
   const setMaxPrice = useTradingStore((state) => state.setMaxPrice);
 
-  const { oraclePrice } = useOraclePrice(marketIndex);
+  const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
+  const oraclePrice = oraclePriceBN
+    ? parseFloat(oraclePriceBN.toString()) / 1e6
+    : null;
 
   // Handle price click from the order book
   const handlePriceClick = useCallback(
     (clickedPrice: number) => {
-      // Create BN from the raw price with proper precision
-      const newPriceBN = new BN(Math.floor(clickedPrice));
-      setPriceBN(newPriceBN);
+      // Use the clicked price directly as a number
+      setPrice(clickedPrice / 1e6); // Convert from raw price to UI price
     },
-    [setPriceBN]
+    [setPrice]
   );
 
   // Handle trigger condition selection
@@ -43,47 +44,44 @@ export const useOrderPrice = (marketIndex: number) => {
   // Set price to oracle price
   const setOracleAsPrice = useCallback(() => {
     if (oraclePrice) {
-      setPriceBN(oraclePrice);
+      setPrice(oraclePrice);
     }
-  }, [oraclePrice, setPriceBN]);
+  }, [oraclePrice, setPrice]);
 
   // Set trigger price to oracle price
   const setOracleAsTriggerPrice = useCallback(() => {
     if (oraclePrice) {
-      setTriggerPriceBN(oraclePrice);
+      setTriggerPrice(oraclePrice);
     }
-  }, [oraclePrice, setTriggerPriceBN]);
+  }, [oraclePrice, setTriggerPrice]);
 
   // Update scale order min/max prices when price changes
   useEffect(() => {
-    if (priceBN && useScaleOrders) {
-      const currentPrice = parseFloat(priceBN.toString()) / 1e6;
-
+    if (price && useScaleOrders) {
       // Only update min/max prices if they haven't been set yet
       if (minPrice === null) {
-        setMinPrice(currentPrice * 0.95);
+        setMinPrice(price * 0.95);
       }
 
       if (maxPrice === null) {
-        setMaxPrice(currentPrice * 1.05);
+        setMaxPrice(price * 1.05);
       }
     }
-  }, [priceBN, useScaleOrders, minPrice, maxPrice, setMinPrice, setMaxPrice]);
+  }, [price, useScaleOrders, minPrice, maxPrice, setMinPrice, setMaxPrice]);
 
   // Calculate TP/SL prices based on price and direction
   const calculateTPSLValues = useCallback(() => {
-    if (priceBN) {
-      const currentPrice = parseFloat(priceBN.toString()) / 1e6;
-      return calculateTPSLPrices(currentPrice, selectedDirection);
+    if (price) {
+      return calculateTPSLPrices(price, selectedDirection);
     }
     return null;
-  }, [priceBN, selectedDirection]);
+  }, [price, selectedDirection]);
 
   return {
-    priceBN,
-    setPriceBN,
-    triggerPriceBN,
-    setTriggerPriceBN,
+    price,
+    setPrice,
+    triggerPrice,
+    setTriggerPrice,
     triggerCondition,
     handlePriceClick,
     handleTriggerConditionChange,

@@ -1,6 +1,6 @@
 import { OrderType, PositionDirection, BN } from "@drift-labs/sdk";
 import { useState, useCallback } from "react";
-import { useActiveAccount } from "./useActiveAccount";
+import { useActiveAccount } from "@/app/providers/ActiveAccountProvider";
 import { useDriftClient } from "./useDriftClient";
 import { useTransactions } from "./useTransactions";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
@@ -39,7 +39,6 @@ export interface ScaleOrderParams {
   distribution?: ScaleOrderDistribution; // Optional distribution pattern
 }
 
-// Interface for order with take profit and stop loss
 export interface OrderWithTPSLParams {
   marketIndex: number;
   direction: PositionDirection;
@@ -66,13 +65,12 @@ export interface OrderWithTPSLParams {
 
 export function usePerpOrder() {
   const { client } = useDriftClient();
-  const { activeAccount, activeId } = useActiveAccount();
+  const { activeAccount, activeAccountId } = useActiveAccount();
   const { trackTransaction } = useTransactions();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [lastResult, setLastResult] = useState<OrderResult | null>(null);
 
-  // Method to place multiple orders with tracking
   const placeOrdersWithTracking = useCallback(
     async (orderParamsArray: PlacePerpOrderParams[]): Promise<OrderResult> => {
       if (!client) {
@@ -113,7 +111,6 @@ export function usePerpOrder() {
     [client, activeAccount, trackTransaction]
   );
 
-  // Convenience method for market orders (from usePerpOrder)
   const placeMarketOrder = useCallback(
     async (
       marketIndex: number,
@@ -131,7 +128,7 @@ export function usePerpOrder() {
             size,
             orderType: OrderType.MARKET,
           },
-          activeId()
+          activeAccountId
         );
 
         if (result.success && result.txid) {
@@ -150,10 +147,9 @@ export function usePerpOrder() {
         setIsLoading(false);
       }
     },
-    [activeId, trackTransaction]
+    [activeAccountId, trackTransaction]
   );
 
-  // Convenience method for limit orders (from usePerpOrder)
   const placeLimitOrder = useCallback(
     async (
       marketIndex: number,

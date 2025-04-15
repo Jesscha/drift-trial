@@ -70,16 +70,16 @@ export const formatMarketName = (name?: string): string => {
 /**
  * Calculate USD value: size * price
  */
-export const calculateUsdValue = (size: BN, price: BN): BN => {
-  return size.mul(price).div(new BN(1e6));
+export const calculateUsdValue = (size: number, price: number): number => {
+  return size * price;
 };
 
 /**
  * Calculate size: usdValue / price
  */
-export const calculateSize = (usdValue: BN, price: BN): BN => {
-  if (price.isZero()) return new BN(0);
-  return usdValue.mul(new BN(1e6)).div(price);
+export const calculateSize = (usdValue: number, price: number): number => {
+  if (price === 0) return 0;
+  return usdValue / price;
 };
 
 /**
@@ -187,10 +187,10 @@ export const getScaleOrderPriceRange = (basePrice: number) => {
 /**
  * Check if the value is at or near max
  */
-export const isAtMaxValue = (value: BN, max: BN): boolean => {
-  if (!max.gt(new BN(0)) || value.isZero()) return false;
+export const isAtMaxValue = (value: number, max: number): boolean => {
+  if (max <= 0 || value === 0) return false;
   // Consider it at max if it's within 1% of the max value
-  return value.gte(max.mul(new BN(99)).div(new BN(100)));
+  return value >= (max * 99) / 100;
 };
 
 /**

@@ -1,7 +1,6 @@
-import { BN, PositionDirection } from "@drift-labs/sdk";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
+import { PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import { OrderTypeOption, formatMarketName } from "../modal/TradingModal.util";
+import { formatMarketName } from "../modal/TradingModal.util";
 import { formatBN } from "@/app/utils/number";
 import { useOrderExecution } from "@/app/hooks/trading";
 
@@ -16,18 +15,9 @@ export const OrderButton = ({
   marketIndex,
   onOrderConfirmed,
 }: OrderButtonProps) => {
-  const sizeBN = useTradingStore((state) => state.sizeBN);
-  const priceBN = useTradingStore((state) => state.priceBN);
-  const triggerPriceBN = useTradingStore((state) => state.triggerPriceBN);
-  const triggerCondition = useTradingStore((state) => state.triggerCondition);
+  const size = useTradingStore((state) => state.size);
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
   const orderSubmitted = useTradingStore((state) => state.orderSubmitted);
-  const useScaleOrders = useTradingStore((state) => state.useScaleOrders);
-  const numScaleOrders = useTradingStore((state) => state.numScaleOrders);
-  const scaleDistribution = useTradingStore((state) => state.scaleDistribution);
 
   const { isOrderLoading, txStatus, isButtonDisabled, handlePlaceOrder } =
     useOrderExecution(marketIndex, onOrderConfirmed);
@@ -44,73 +34,11 @@ export const OrderButton = ({
       return "Submitting...";
     }
 
-    // Base button text
     let buttonText = `${
-      selectedDirection === "long" ? "Buy" : "Sell"
-    } ${formatBN(sizeBN.div(new BN(1e6)))} ${formatMarketName(marketName)}`;
-
-    // Order type details
-    if (
-      useScaleOrders &&
-      selectedCustomOrderType === OrderTypeOption.LIMIT &&
-      priceBN
-    ) {
-      const distributionSymbol =
-        scaleDistribution === "ascending"
-          ? "↑"
-          : scaleDistribution === "descending"
-          ? "↓"
-          : scaleDistribution === "random"
-          ? "↔"
-          : "=";
-      buttonText += ` • Scale ${distributionSymbol} (${numScaleOrders})`;
-    } else {
-      switch (selectedCustomOrderType) {
-        case OrderTypeOption.MARKET:
-          buttonText += " at Market";
-          break;
-        case OrderTypeOption.LIMIT:
-          buttonText += priceBN
-            ? ` at ${parseFloat(priceBN.toString()) / 1e6}`
-            : "";
-          break;
-        case OrderTypeOption.STOP_MARKET:
-          buttonText += triggerPriceBN
-            ? ` Stop ${
-                triggerCondition === TriggerCondition.ABOVE ? "↑" : "↓"
-              } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
-            : "";
-          break;
-        case OrderTypeOption.STOP_LIMIT:
-          buttonText +=
-            triggerPriceBN && priceBN
-              ? ` Stop ${parseFloat(priceBN.toString()) / 1e6} @ ${
-                  triggerCondition === TriggerCondition.ABOVE ? "↑" : "↓"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
-              : "";
-          break;
-        case OrderTypeOption.TAKE_PROFIT:
-          buttonText += triggerPriceBN
-            ? ` TP ${triggerCondition === TriggerCondition.ABOVE ? "↑" : "↓"} ${
-                parseFloat(triggerPriceBN.toString()) / 1e6
-              }`
-            : "";
-          break;
-        case OrderTypeOption.TAKE_PROFIT_LIMIT:
-          buttonText +=
-            triggerPriceBN && priceBN
-              ? ` TP ${parseFloat(priceBN.toString()) / 1e6} @ ${
-                  triggerCondition === TriggerCondition.ABOVE ? "↑" : "↓"
-                } ${parseFloat(triggerPriceBN.toString()) / 1e6}`
-              : "";
-          break;
-        case OrderTypeOption.ORACLE_LIMIT:
-          buttonText += " Oracle";
-          break;
-        default:
-          break;
-      }
-    }
+      selectedDirection === PositionDirection.LONG ? "Buy" : "Sell"
+    } ${
+      size !== null && size !== undefined ? size.toFixed(2) : "0.00"
+    } ${formatMarketName(marketName)}`;
 
     return buttonText;
   };
@@ -121,7 +49,7 @@ export const OrderButton = ({
         onClick={handlePlaceOrder}
         disabled={isButtonDisabled}
         className={`w-full py-3 mt-auto rounded-lg font-medium text-base transition-colors ${
-          selectedDirection === "long"
+          selectedDirection === PositionDirection.LONG
             ? "bg-green-60 hover:bg-green-70"
             : "bg-red-60 hover:bg-red-70"
         } text-white disabled:opacity-50 disabled:cursor-not-allowed`}

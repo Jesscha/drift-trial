@@ -1,4 +1,4 @@
-import { BN, OrderType } from "@drift-labs/sdk";
+import { OrderType } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
 import { useOrderFeatures } from "@/app/hooks/trading";
@@ -18,7 +18,7 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
   const maxPrice = useTradingStore((state) => state.maxPrice);
   const setMaxPrice = useTradingStore((state) => state.setMaxPrice);
   const scaleDistribution = useTradingStore((state) => state.scaleDistribution);
-  const priceBN = useTradingStore((state) => state.priceBN);
+  const price = useTradingStore((state) => state.price);
   const orderType = useTradingStore((state) => state.selectedOrderType);
 
   // Get distribution options and handler from useOrderFeatures
@@ -96,11 +96,7 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
                   <input
                     type="number"
                     value={
-                      minPrice !== null
-                        ? minPrice
-                        : priceBN
-                        ? (parseFloat(priceBN.toString()) / 1e6) * 0.95
-                        : ""
+                      minPrice !== null ? minPrice : price ? price * 0.95 : ""
                     }
                     onChange={(e) => {
                       if (!e.target.value) {
@@ -123,11 +119,7 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
                   <input
                     type="number"
                     value={
-                      maxPrice !== null
-                        ? maxPrice
-                        : priceBN
-                        ? (parseFloat(priceBN.toString()) / 1e6) * 1.05
-                        : ""
+                      maxPrice !== null ? maxPrice : price ? price * 1.05 : ""
                     }
                     onChange={(e) => {
                       if (!e.target.value) {
@@ -161,14 +153,14 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
               between{" "}
               {minPrice !== null
                 ? minPrice
-                : priceBN
-                ? ((parseFloat(priceBN.toString()) / 1e6) * 0.95).toFixed(2)
+                : price
+                ? (price * 0.95).toFixed(2)
                 : "..."}{" "}
               and{" "}
               {maxPrice !== null
                 ? maxPrice
-                : priceBN
-                ? ((parseFloat(priceBN.toString()) / 1e6) * 1.05).toFixed(2)
+                : price
+                ? (price * 1.05).toFixed(2)
                 : "..."}{" "}
               USD
             </div>
