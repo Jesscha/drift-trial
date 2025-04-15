@@ -73,9 +73,9 @@ export const getOrderTypeLabel = (orderType: OrderType): string => {
  * @returns OrderResult with success status and transaction ID
  */
 export const placePerpOrder = async (
-  params: PlacePerpOrderParams
+  params: PlacePerpOrderParams,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  console.log("Step 1: Validating client and account");
   const client = driftService.getClient();
   if (!client) {
     const error = new Error("Drift client not initialized");
@@ -83,7 +83,6 @@ export const placePerpOrder = async (
   }
 
   try {
-    console.log("Step 3: Destructuring parameters");
     const {
       marketIndex,
       direction,
@@ -100,10 +99,8 @@ export const placePerpOrder = async (
       reduceOnly,
     } = params;
 
-    console.log("Step 4: Converting size to base asset precision");
     const baseAssetAmount = client.convertToPerpPrecision(size);
 
-    console.log("Step 5: Building base order parameters");
     const orderParams: OrderParams = {
       ...DefaultOrderParams,
       orderType,
@@ -113,7 +110,6 @@ export const placePerpOrder = async (
       marketType: MarketType.PERP,
     };
 
-    console.log("Step 6: Adding optional price parameters");
     if (price !== undefined) {
       orderParams.price = client.convertToPricePrecision(price);
     }
@@ -124,7 +120,6 @@ export const placePerpOrder = async (
         .toNumber();
     }
 
-    console.log("Step 7: Adding trigger parameters if provided");
     if (triggerPrice !== undefined) {
       orderParams.triggerPrice = client.convertToPricePrecision(triggerPrice);
     }
@@ -134,12 +129,10 @@ export const placePerpOrder = async (
         getTriggerConditionObject(triggerCondition);
     }
 
-    console.log("Step 8: Adding reduce only flag if provided");
     if (reduceOnly !== undefined) {
       orderParams.reduceOnly = reduceOnly;
     }
 
-    console.log("Step 9: Adding auction parameters if provided");
     if (auctionStartPrice !== undefined) {
       orderParams.auctionStartPrice =
         client.convertToPricePrecision(auctionStartPrice);
@@ -154,17 +147,17 @@ export const placePerpOrder = async (
       orderParams.auctionDuration = auctionDuration;
     }
 
-    console.log("Step 10: Adding max timestamp if provided");
     if (maxTs !== undefined) {
       orderParams.maxTs = maxTs;
     }
 
-    console.log("Step 11: Placing the order", orderParams);
-    const tx = await client.placePerpOrder(orderParams);
-    console.log("Step 11: Order placed", tx);
+    const tx = await client.placePerpOrder(
+      orderParams,
+      undefined,
+      subAccountId
+    );
     const txid = tx.toString();
 
-    console.log("Step 12: Creating transaction description");
     const market =
       client.getPerpMarketAccount(marketIndex)?.name ||
       `Market #${marketIndex}`;
@@ -177,7 +170,6 @@ export const placePerpOrder = async (
 
     return { success: true, txid, description };
   } catch (err) {
-    console.log("Step 15: Handling error", err);
     const error = err instanceof Error ? err : new Error(String(err));
     return { success: false, error };
   }
@@ -191,7 +183,6 @@ export const placeMarketOrder = async (
   direction: PositionDirection,
   size: number
 ): Promise<OrderResult> => {
-  console.log("Placing market order");
   return placePerpOrder({
     marketIndex,
     direction,

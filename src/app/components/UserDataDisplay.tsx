@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useParsedUserData,
-  ParsedSubaccountData,
-} from "../hooks/useParsedUserData";
+import { usePNLUserData, UserAccountWithPNL } from "../hooks/usePNLUserData";
 import { BN } from "@drift-labs/sdk";
 import { useState } from "react";
 
@@ -18,7 +15,7 @@ export function UserDataDisplay() {
     totalNetValue,
     isLoading,
     error,
-  } = useParsedUserData();
+  } = usePNLUserData();
 
   const [activeSubaccountId, setActiveSubaccountId] = useState<number | null>(
     subaccounts.length > 0 ? subaccounts[0].subaccountId : null

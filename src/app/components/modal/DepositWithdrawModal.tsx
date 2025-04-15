@@ -4,13 +4,9 @@ import { deposit } from "@/services/drift/deposit";
 import { withdraw } from "@/services/drift/withdraw";
 import { useTransactions } from "@/app/hooks/useTransactions";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
-import {
-  useParsedUserData,
-  ParsedSubaccountData,
-} from "@/app/hooks/useParsedUserData";
+import { usePNLUserData } from "@/app/hooks/usePNLUserData";
 import { PercentageSlider } from "@/app/components/PercentageSlider";
 import { useSpotMarketAccounts } from "@/app/hooks/useSpotMarketAccounts";
-import { useDriftClient } from "@/app/hooks/useDriftClient";
 import {
   CustomDropdown,
   DropdownOption,
@@ -18,6 +14,7 @@ import {
 import { useWalletTokenBalances } from "@/app/hooks/useWalletTokenBalances";
 import { useActiveAccount } from "@/app/hooks/useActiveAccount";
 import { BN } from "@drift-labs/sdk";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface DepositWithdrawModalProps {
   isOpen: boolean;
@@ -40,8 +37,10 @@ export function DepositWithdrawModal({
   onTxComplete,
   walletBalance = 0,
 }: DepositWithdrawModalProps) {
-  const { subaccounts, isLoading: isLoadingSubaccounts } = useParsedUserData();
-  const { activeAccount } = useActiveAccount();
+  const { publicKey } = useWallet();
+  const { subaccounts, isLoading: isLoadingSubaccounts } =
+    usePNLUserData(publicKey);
+  const { activeAccount, getWithdrawalLimit } = useActiveAccount();
   const [selectedSubaccountId, setSelectedSubaccountId] =
     useState<number>(initialSubaccountId);
   const [mode, setMode] = useState<"deposit" | "withdraw">(initialMode);
@@ -117,28 +116,20 @@ export function DepositWithdrawModal({
 
   // Find the currently selected subaccount data
   const selectedSubaccount = subaccounts?.find(
-    (acc) => acc.subaccountId === selectedSubaccountId
+    (acc) => acc.subAccountId === selectedSubaccountId
   );
 
   // Function to get token balances in each subaccount
   const getSubaccountTokenBalances = React.useMemo(() => {
-    console.log("getSubaccountTokenBalances", subaccounts, selectedMarketIndex);
     if (!subaccounts || (!selectedMarketIndex && selectedMarketIndex !== 0))
       return [];
 
     return subaccounts.map((subaccount) => {
       // Access the raw user account to get spot positions
-      const rawAccount = subaccount.rawUserAccount;
 
       // Try to find the spot position for the selected token
-      const spotPosition = rawAccount.spotPositions.find(
+      const spotPosition = subaccount.spotPositions.find(
         (position) => position.marketIndex === selectedMarketIndex
-      );
-
-      console.log(
-        "spotPosition",
-        spotPosition?.marketIndex,
-        spotPosition?.scaledBalance.toString()
       );
 
       let tokenBalance = 0;
@@ -158,7 +149,7 @@ export function DepositWithdrawModal({
       }
 
       return {
-        subaccountId: subaccount.subaccountId,
+        subaccountId: subaccount.subAccountId,
         tokenBalance,
         tokenSymbol: token,
         formattedBalance: tokenBalance.toLocaleString(undefined, {
@@ -185,20 +176,11 @@ export function DepositWithdrawModal({
       );
 
       // Get the withdrawal limit from the User class if activeAccount is available
-      if (activeAccount?.user && selectedMarketIndex !== undefined) {
+      if (activeAccount && selectedMarketIndex !== undefined) {
         try {
           // Get the withdrawal limit using the SDK method
-          const withdrawalLimit = activeAccount.user.getWithdrawalLimit(
-            selectedMarketIndex,
-            true
-          );
-
-          console.log(
-            "withdrawalLimit",
-            withdrawalLimit.toString(),
-            selectedMarketIndex,
-            reduceOnly
-          );
+          const withdrawalLimit =
+            getWithdrawalLimit?.(selectedMarketIndex, true) || new BN(0);
 
           // Get the market for decimal conversion
           const marketAccount = marketsList.find(
@@ -207,8 +189,9 @@ export function DepositWithdrawModal({
           const decimals = marketAccount?.metadata.decimals || 6;
 
           // Convert BN to number with appropriate decimal precision
-          const withdrawalLimitNumber =
-            parseFloat(withdrawalLimit.toString()) / Math.pow(10, decimals);
+          const withdrawalLimitNumber = withdrawalLimit
+            ? parseFloat(withdrawalLimit.toString()) / Math.pow(10, decimals)
+            : 0;
 
           // Compare with token balance and return the smallest value
           const userTokenBalance = subaccountTokenInfo?.tokenBalance || 0;
@@ -216,7 +199,6 @@ export function DepositWithdrawModal({
           // Return the minimum of user's balance and the calculated withdrawal limit
           return Math.min(userTokenBalance, withdrawalLimitNumber);
         } catch (err) {
-          console.error("Error calculating withdrawal limit:", err);
           // Fall back to basic balance if there's an error
           return subaccountTokenInfo?.tokenBalance || 0;
         }
@@ -237,6 +219,7 @@ export function DepositWithdrawModal({
     selectedMarketIndex,
     reduceOnly,
     marketsList,
+    getWithdrawalLimit,
   ]);
 
   // Get asset balance from selected subaccount
@@ -255,13 +238,13 @@ export function DepositWithdrawModal({
     if (!subaccounts || subaccounts.length === 0) return [];
 
     return subaccounts.map((acc) => {
-      let label = `Subaccount #${acc.subaccountId}`;
+      let label = `Subaccount #${acc.subAccountId}`;
       let description = `${formatValue(acc.netTotal / 1e6, true)} Net Value`;
 
       // Add token balance info if in withdraw mode
       if (mode === "withdraw") {
         const tokenInfo = getSubaccountTokenBalances.find(
-          (info) => info.subaccountId === acc.subaccountId
+          (info) => info.subaccountId === acc.subAccountId
         );
 
         if (tokenInfo && tokenInfo.tokenBalance > 0) {
@@ -272,13 +255,13 @@ export function DepositWithdrawModal({
       }
 
       return {
-        value: acc.subaccountId,
+        value: acc.subAccountId,
         label,
         description,
         hasToken:
           mode === "withdraw"
             ? getSubaccountTokenBalances.find(
-                (info) => info.subaccountId === acc.subaccountId
+                (info) => info.subaccountId === acc.subAccountId
               )?.tokenBalance > 0
             : true,
       };
@@ -479,7 +462,6 @@ export function DepositWithdrawModal({
       setAmount("");
       // onClose will be handled by useEffect when transaction is confirmed
     } catch (err) {
-      console.error("Transaction failed:", err);
       setError(err instanceof Error ? err.message : "Transaction failed");
       setOrderSubmitted(false);
       // Notify parent that transaction is complete (even if it failed)
@@ -822,7 +804,7 @@ export function DepositWithdrawModal({
           </div>
 
           {mode === "withdraw" &&
-            activeAccount?.user &&
+            activeAccount &&
             (() => {
               // Calculate if the withdrawal limit is less than the user's balance
               const subaccountTokenInfo = getSubaccountTokenBalances.find(

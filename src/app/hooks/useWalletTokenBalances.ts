@@ -237,10 +237,6 @@ export function useWalletTokenBalances() {
           dollarValue = solAmount * priceUsd;
         }
       }
-      console.log("solMarket", solMarket);
-      console.log("oraclePrices", oraclePrices);
-      console.log("price", priceUsd);
-      console.log("dollarValue", dollarValue);
 
       balances.push({
         marketIndex: 1,

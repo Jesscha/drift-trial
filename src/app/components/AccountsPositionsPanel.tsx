@@ -1,13 +1,11 @@
 import { useState } from "react";
-import {
-  useParsedUserData,
-  ParsedSubaccountData,
-} from "../hooks/useParsedUserData";
+import { usePNLUserData, UserAccountWithPNL } from "../hooks/usePNLUserData";
 import { formatBN } from "../utils/number";
 import { usePerpMarketAccounts } from "../hooks/usePerpMarketAccounts";
 import { DepositWithdrawModal } from "./modal/DepositWithdrawModal";
-
+import { useWallet } from "@solana/wallet-adapter-react";
 export function AccountsPositionsPanel() {
+  const { publicKey } = useWallet();
   const {
     subaccounts,
     totalDepositAmount,
@@ -15,7 +13,7 @@ export function AccountsPositionsPanel() {
     totalNetValue,
     isLoading,
     error,
-  } = useParsedUserData();
+  } = usePNLUserData(publicKey);
 
   const { markets, isLoading: isLoadingMarkets } = usePerpMarketAccounts();
 
@@ -28,19 +26,19 @@ export function AccountsPositionsPanel() {
   const [processingTx, setProcessingTx] = useState<number | null>(null);
 
   // Modal control functions
-  const openDeposit = (subaccount: ParsedSubaccountData) => {
+  const openDeposit = (subaccount: UserAccountWithPNL) => {
     setModalState({
       isOpen: true,
       mode: "deposit",
-      subaccountId: subaccount.subaccountId,
+      subaccountId: subaccount.subAccountId,
     });
   };
 
-  const openWithdraw = (subaccount: ParsedSubaccountData) => {
+  const openWithdraw = (subaccount: UserAccountWithPNL) => {
     setModalState({
       isOpen: true,
       mode: "withdraw",
-      subaccountId: subaccount.subaccountId,
+      subaccountId: subaccount.subAccountId,
     });
   };
 
@@ -119,24 +117,24 @@ export function AccountsPositionsPanel() {
       <div className="space-y-4">
         {subaccounts.map((subaccountData) => (
           <div
-            key={subaccountData.subaccountId}
+            key={subaccountData.subAccountId}
             className="bg-neutrals-20 dark:bg-neutrals-70 rounded-lg p-3"
           >
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-semibold">
-                Subaccount #{subaccountData.subaccountId}
+                Subaccount #{subaccountData.subAccountId}
               </h3>
               <div className="flex space-x-2 items-center">
                 <button
                   onClick={() => openDeposit(subaccountData)}
-                  disabled={processingTx === subaccountData.subaccountId}
+                  disabled={processingTx === subaccountData.subAccountId}
                   className={`px-3 py-1 text-sm rounded ${
-                    processingTx === subaccountData.subaccountId
+                    processingTx === subaccountData.subAccountId
                       ? "bg-green-60 opacity-70 cursor-not-allowed"
                       : "bg-green-50 hover:bg-green-60"
                   } text-white transition-colors`}
                 >
-                  {processingTx === subaccountData.subaccountId ? (
+                  {processingTx === subaccountData.subAccountId ? (
                     <span className="flex items-center">
                       <svg
                         className="animate-spin h-4 w-4 mr-1"
@@ -166,14 +164,14 @@ export function AccountsPositionsPanel() {
                 </button>
                 <button
                   onClick={() => openWithdraw(subaccountData)}
-                  disabled={processingTx === subaccountData.subaccountId}
+                  disabled={processingTx === subaccountData.subAccountId}
                   className={`px-3 py-1 text-sm rounded ${
-                    processingTx === subaccountData.subaccountId
+                    processingTx === subaccountData.subAccountId
                       ? "bg-red-60 opacity-70 cursor-not-allowed"
                       : "bg-red-50 hover:bg-red-60"
                   } text-white transition-colors`}
                 >
-                  {processingTx === subaccountData.subaccountId ? (
+                  {processingTx === subaccountData.subAccountId ? (
                     <span className="flex items-center">
                       <svg
                         className="animate-spin h-4 w-4 mr-1"
@@ -232,7 +230,7 @@ export function AccountsPositionsPanel() {
             </div>
 
             {/* Positions */}
-            {subaccountData.positions.length > 0 ? (
+            {subaccountData.perpPositions.length > 0 ? (
               <div>
                 <h4 className="font-medium border-b border-neutrals-30 dark:border-neutrals-60 pb-1 mb-2">
                   Positions
@@ -249,7 +247,7 @@ export function AccountsPositionsPanel() {
                       </tr>
                     </thead>
                     <tbody>
-                      {subaccountData.positions.map((position) => {
+                      {subaccountData.perpPositions.map((position) => {
                         const oraclePrice = position.oraclePrice;
                         const marketData = markets[position.marketIndex];
 
@@ -265,10 +263,10 @@ export function AccountsPositionsPanel() {
                                   `Market #${position.marketIndex}`}
                             </td>
                             <td className="text-right py-2">
-                              {formatBN(position.baseAmount, false, 5)}
+                              {formatBN(position.baseAssetAmount, false, 5)}
                             </td>
                             <td className="text-right py-2">
-                              {formatBN(position.quoteAmount)}
+                              {formatBN(position.quoteAssetAmount, false, 5)}
                             </td>
                             <td className="text-right py-2">
                               {oraclePrice

@@ -1,29 +1,30 @@
-import { BASE_PRECISION, BN, UserAccount } from "@drift-labs/sdk";
+import {
+  BASE_PRECISION,
+  BN,
+  PerpPosition,
+  PublicKey,
+  UserAccount,
+} from "@drift-labs/sdk";
 import { useUserAccounts } from "./useUserAccounts";
 import { useMemo } from "react";
 import { getPerpOraclePrice } from "@/services/drift/market";
 import useSWR from "swr";
-import { useDriftClient } from "./useDriftClient";
+
+export type PerpPositionWithPNL = PerpPosition & {
+  unsettledPnl: BN | null;
+  oraclePrice: BN | null;
+};
 
 // Type for parsed subaccount data
-export type ParsedSubaccountData = {
-  subaccountId: number;
+export type UserAccountWithPNL = Omit<UserAccount, "perpPositions"> & {
   depositAmount: BN;
   netUnsettledPnl: BN;
   netTotal: BN;
-  positions: {
-    marketIndex: number;
-    baseAmount: BN;
-    quoteAmount: BN;
-    lpShares: BN;
-    unsettledPnl: BN | null;
-    oraclePrice: BN | null;
-  }[];
-  rawUserAccount: UserAccount;
+  perpPositions: PerpPositionWithPNL[];
 };
 
-export type ParsedUserDataResult = {
-  subaccounts: ParsedSubaccountData[];
+export type PNLUserDataResult = {
+  subaccounts: UserAccountWithPNL[];
   totalDepositAmount: BN | null;
   totalUnsettledPnl: BN | null;
   totalNetValue: BN | null;
@@ -32,32 +33,29 @@ export type ParsedUserDataResult = {
   refresh: () => void;
 };
 
-export function useParsedUserData(): ParsedUserDataResult {
-  const { isInitialized } = useDriftClient();
+export function usePNLUserData(
+  publicKey?: PublicKey | null
+): PNLUserDataResult {
   const {
     userAccount,
     isLoading: isUserLoading,
     error: userError,
-  } = useUserAccounts();
+  } = useUserAccounts(publicKey);
 
-  // Create a key for SWR cache that depends on userAccount data
   const swrKey = useMemo(() => {
     if (
-      !isInitialized ||
       isUserLoading ||
       !userAccount ||
+      !publicKey ||
       userAccount.length === 0
     ) {
       return null;
     }
 
-    // This ensures SWR will revalidate when userAccount changes
-    return `parsedUserData-${userAccount
-      .map((acc) => acc.subAccountId)
-      .join("-")}`;
-  }, [isInitialized, isUserLoading, userAccount]);
+    return `parsedUserData-${publicKey.toBase58()}`;
+  }, [isUserLoading, userAccount]);
 
-  const processUserData = async () => {
+  const injectOraclePriceToUserAccounts = async () => {
     if (!userAccount || userAccount.length === 0) {
       return {
         subaccounts: [],
@@ -68,7 +66,7 @@ export function useParsedUserData(): ParsedUserDataResult {
     }
 
     try {
-      const subaccountsData: ParsedSubaccountData[] = [];
+      const subaccountsData: UserAccountWithPNL[] = [];
 
       for (const account of userAccount) {
         const depositAmount = account.totalDeposits
@@ -76,14 +74,7 @@ export function useParsedUserData(): ParsedUserDataResult {
           .add(account.settledPerpPnl);
 
         let netUnsettledPnl = new BN(0);
-        const positions: {
-          marketIndex: number;
-          baseAmount: BN;
-          quoteAmount: BN;
-          lpShares: BN;
-          unsettledPnl: BN | null;
-          oraclePrice: BN | null;
-        }[] = [];
+        const positions: PerpPositionWithPNL[] = [];
 
         for (const position of account.perpPositions) {
           if (
@@ -91,7 +82,6 @@ export function useParsedUserData(): ParsedUserDataResult {
             !position.quoteAssetAmount.isZero() ||
             !position.lpShares.isZero()
           ) {
-            // Fetch price directly
             const oraclePrice = await getPerpOraclePrice(position.marketIndex);
 
             let positionUnsettledPnl: BN | null = null;
@@ -109,27 +99,23 @@ export function useParsedUserData(): ParsedUserDataResult {
             }
 
             positions.push({
-              marketIndex: position.marketIndex,
-              baseAmount: position.baseAssetAmount,
-              quoteAmount: position.quoteAssetAmount,
-              lpShares: position.lpShares,
+              ...position,
               unsettledPnl: positionUnsettledPnl,
               oraclePrice: oraclePrice,
             });
           }
         }
+        const netTotal = depositAmount.add(netUnsettledPnl);
 
         subaccountsData.push({
-          subaccountId: account.subAccountId,
+          ...account,
           depositAmount,
           netUnsettledPnl,
-          netTotal: depositAmount.add(netUnsettledPnl),
-          positions,
-          rawUserAccount: account,
+          netTotal,
+          perpPositions: positions,
         });
       }
 
-      // Calculate totals across all subaccounts
       let totalDepositAmount = new BN(0);
       let totalUnsettledPnl = new BN(0);
 
@@ -152,15 +138,19 @@ export function useParsedUserData(): ParsedUserDataResult {
     }
   };
 
-  const { data, error, isLoading, mutate } = useSWR(swrKey, processUserData, {
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-    refreshInterval: 5000, // Refresh every 5 seconds
-    shouldRetryOnError: true,
-    errorRetryCount: 3,
-  });
+  const { data, error, isLoading, mutate } = useSWR(
+    swrKey,
+    injectOraclePriceToUserAccounts,
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      refreshInterval: 5000, // Refresh every 5 seconds
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
+    }
+  );
 
-  const result: ParsedUserDataResult = {
+  const result: PNLUserDataResult = {
     subaccounts: data?.subaccounts || [],
     totalDepositAmount: data?.totalDepositAmount || null,
     totalUnsettledPnl: data?.totalUnsettledPnl || null,

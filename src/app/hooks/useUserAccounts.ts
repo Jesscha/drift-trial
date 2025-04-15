@@ -1,12 +1,11 @@
-import { DriftClient, UserAccount } from "@drift-labs/sdk";
+import { PublicKey, UserAccount } from "@drift-labs/sdk";
 import { useDriftClient } from "./useDriftClient";
-import { useWallet } from "@solana/wallet-adapter-react";
-import useSWR from "swr";
-import { getAllUsers, getUserAccount } from "@/services/drift/account";
 
-export function useUserAccounts() {
+import useSWR from "swr";
+import { getAllUsers } from "@/services/drift/account";
+
+export function useUserAccounts(publicKey?: PublicKey | null) {
   const { isInitialized } = useDriftClient();
-  const { publicKey } = useWallet();
 
   const {
     data: userAccount,

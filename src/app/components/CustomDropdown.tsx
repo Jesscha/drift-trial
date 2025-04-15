@@ -109,7 +109,6 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
       )}
 
       <div className="relative" ref={dropdownRef}>
-        {/* Selected value display */}
         <div
           onClick={toggleDropdown}
           className={`bg-neutrals-10 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70 p-2 flex justify-between items-center cursor-pointer ${

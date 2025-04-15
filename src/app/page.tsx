@@ -7,17 +7,13 @@ import { deposit } from "../services/drift/deposit";
 import { useTransactions } from "./hooks/useTransactions";
 import { TransactionToasts } from "./components/TransactionToasts";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
-import { Modal } from "./components/modal/Modal";
 import { useModal } from "./hooks/useModal";
-import { useParsedUserData } from "./hooks/useParsedUserData";
 import useSWR from "swr";
-import { BN, OrderType } from "@drift-labs/sdk";
 import { AccountsPositionsPanel } from "./components/AccountsPositionsPanel";
 import { TradingModal } from "./components/modal/TradingModal";
 import { useActiveAccount } from "./hooks/useActiveAccount";
 import { formatBN } from "./utils/number";
-import DriftThemeDemo from "./components/DriftThemeDemo";
-import ColorTest from "./components/ColorTest";
+import { PositionDirection } from "@drift-labs/sdk";
 
 const useTest = () => {
   const { data, error, isLoading } = useSWR(
@@ -40,9 +36,7 @@ const useTest = () => {
 export default function Home() {
   const { publicKey, connected } = useWallet();
   const { userAccount, isLoading, error, refreshUserAccount } =
-    useUserAccounts();
-  const { data } = useTest();
-
+    useUserAccounts(publicKey);
   const { trackTransaction } = useTransactions();
   const { isOpen, open, close } = useModal(false);
   const {
@@ -65,11 +59,17 @@ export default function Home() {
         { type: TransactionSuccessActionType.UPDATE_USER_ACCOUNT },
       ]);
     } catch (error) {
-      console.error("Deposit failed:", error);
+      // Remove console.error statements while keeping the actual functionality
     }
   };
 
-  const { activeAccount, switchActiveAccount } = useActiveAccount();
+  const {
+    activeAccount,
+    switchActiveAccount,
+    getUserAccountPublicKey,
+    getFreeCollateral,
+    activeId: getActiveId,
+  } = useActiveAccount();
 
   // Modal footer with action buttons
   const modalFooter = (
@@ -206,12 +206,10 @@ export default function Home() {
       </div>
 
       <div>
-        <p>
-          Active Account: {activeAccount?.user?.userAccountPublicKey.toString()}
-        </p>
-        <p>Active Account ID: {activeAccount?.activeId}</p>
+        <p>Active Account: {getUserAccountPublicKey()?.toString()}</p>
+        <p>Active Account ID: {getActiveId()}</p>
         {/* free collateral */}
-        <p>Free Collateral: {formatBN(activeAccount?.freeCollateral, true)}</p>
+        <p>Free Collateral: {formatBN(getFreeCollateral(), true)}</p>
       </div>
 
       <button onClick={() => switchActiveAccount(1)}>
@@ -221,7 +219,7 @@ export default function Home() {
       {/* Trading Modal */}
       <TradingModal
         marketIndex={0}
-        orderDirection="long"
+        orderDirection={PositionDirection.LONG}
         orderType={"limit"}
         isOpen={isOpen}
         onClose={close}

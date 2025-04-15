@@ -14,7 +14,6 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, this would fetch data for the entered wallet
-    console.log(`Searching for wallet: ${searchWallet}`);
   };
 
   return (
