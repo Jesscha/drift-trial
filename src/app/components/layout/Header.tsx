@@ -48,7 +48,7 @@ export default function Header() {
           {/* Mobile menu button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 text-neutrals-100 dark:text-neutrals-0"
+            className="lg:hidden p-2 text-neutrals-100 dark:text-neutrals-0"
             aria-label="Toggle menu"
           >
             <div className="w-6 flex flex-col gap-1">
@@ -71,7 +71,7 @@ export default function Header() {
           </button>
 
           {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             <nav>
               <ul className="flex space-x-6">
                 <li>
@@ -118,15 +118,15 @@ export default function Header() {
             </form>
 
             <div className="flex items-center space-x-3">
-              <ThemeToggle />
               <WalletMultiButton className="!bg-primary-gradient hover:!opacity-90" />
+              <ThemeToggle />
             </div>
           </div>
         </div>
 
         {/* Mobile menu (dropdown) */}
         <div
-          className={`md:hidden transition-all duration-300 ease-in-out ${
+          className={`lg:hidden transition-all duration-300 ease-in-out ${
             mobileMenuOpen
               ? "max-h-screen opacity-100 py-4"
               : "max-h-0 opacity-0 overflow-hidden py-0"
@@ -180,8 +180,8 @@ export default function Header() {
           </form>
 
           <div className="flex items-center space-x-3">
-            <ThemeToggle />
             <WalletMultiButton className="!bg-primary-gradient hover:!opacity-90" />
+            <ThemeToggle />
           </div>
         </div>
       </div>
