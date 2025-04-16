@@ -98,7 +98,7 @@ export function AccountCard({
               Withdraw
             </button>
           )}
-          <div className="relative w-5 h-5">
+          <div className="w-5 h-5">
             <ChevronDownIcon
               size="md"
               className={`text-neutrals-60 dark:text-neutrals-40 transition-transform ${

@@ -230,3 +230,24 @@ export const LoadingSpinnerIcon: React.FC<IconProps> = ({
     </svg>
   </IconWrapper>
 );
+
+export const ChartIcon: React.FC<IconProps> = ({ className = "", size }) => (
+  <IconWrapper className={className} size={size}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 12l3-3 3 3 4-4"></path>
+      <path d="M8 21l4-4 4 4"></path>
+      <path d="M3 4h18"></path>
+      <path d="M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+    </svg>
+  </IconWrapper>
+);

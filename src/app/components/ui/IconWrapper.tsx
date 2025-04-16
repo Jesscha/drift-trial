@@ -30,7 +30,7 @@ export const IconWrapper = ({
       <div className="absolute inset-0 dark:bg-neutrals-60/20 rounded-full opacity-0 dark:opacity-100" />
 
       {/* Icon content */}
-      <div className="relative z-10 flex items-center justify-center w-full h-full">
+      <div className="flex items-center justify-center w-full h-full">
         {children}
       </div>
     </div>

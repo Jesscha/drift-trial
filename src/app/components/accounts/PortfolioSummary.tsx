@@ -1,5 +1,5 @@
 import { formatBN } from "../../utils/number";
-import Image from "next/image";
+import { ChartIcon } from "../../assets/icons";
 
 interface PortfolioSummaryProps {
   totalDepositAmount: any;
@@ -16,15 +16,7 @@ export function PortfolioSummary({
     <div>
       <div className="flex items-center mb-4">
         <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-          <div className="relative h-4 w-4">
-            <Image
-              src="/icons/chart.svg"
-              alt="Portfolio Chart"
-              width={16}
-              height={16}
-              className="text-purple-50"
-            />
-          </div>
+          <ChartIcon size="sm" className="text-purple-50" />
         </div>
         <h2 className="text-lg font-medium">Portfolio Summary</h2>
       </div>
