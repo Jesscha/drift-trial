@@ -10,7 +10,7 @@ import { useActiveAccount } from "./providers/ActiveAccountProvider";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useState } from "react";
 import { AccountsPositionsPanel } from "./components/accounts";
-import { TxModalController } from "./components/TxModalController";
+import { TradingModalController } from "./components/TradingModalController";
 
 export default function Home() {
   const { connected } = useWallet();
@@ -41,7 +41,7 @@ export default function Home() {
         </div>
 
         <div className="md:col-span-4 ">
-          {connected && <TxModalController />}
+          {connected && <TradingModalController />}
         </div>
       </div>
     </main>

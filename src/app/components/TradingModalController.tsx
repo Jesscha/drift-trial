@@ -7,7 +7,7 @@ import { CustomDropdown, DropdownOption } from "./CustomDropdown";
 import { usePNLUserData } from "../hooks/usePNLUserData";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-export const TxModalController = () => {
+export const TradingModalController = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderDirection, setOrderDirection] = useState<any>(
     PositionDirection.LONG
@@ -15,7 +15,6 @@ export const TxModalController = () => {
   const [selectedMarketIndex, setSelectedMarketIndex] = useState(0);
 
   const { marketsList, isLoading: isLoadingMarkets } = usePerpMarketAccounts();
-  console.log("marketsList", marketsList);
 
   const { activeAccountId, switchActiveAccount } = useActiveAccount();
   const { publicKey } = useWallet();
@@ -70,9 +69,9 @@ export const TxModalController = () => {
 
   return (
     <div className="bg-neutrals-5 dark:bg-neutrals-80 rounded-lg p-4 shadow-sm mb-4 sticky top-0">
-      <h3 className="text-base font-medium text-neutrals-100 dark:text-neutrals-0 mb-4">
+      <h2 className="text-xl font-medium text-neutrals-100 dark:text-neutrals-0 mb-4">
         Trading Controls
-      </h3>
+      </h2>
 
       <div className="space-y-4">
         {/* Subaccount selection */}

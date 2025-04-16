@@ -7,9 +7,7 @@ import { SunIcon, MoonIcon } from "../assets/icons";
 const ThemeToggle: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Initialize theme from local storage and system preference
   useEffect(() => {
-    // Check local storage first
     const storedTheme = localStorage.getItem("theme");
 
     if (storedTheme === "dark") {
@@ -19,7 +17,6 @@ const ThemeToggle: React.FC = () => {
       setIsDarkMode(false);
       document.documentElement.classList.remove("dark");
     } else {
-      // If no theme in local storage, check system preference
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
       ).matches;

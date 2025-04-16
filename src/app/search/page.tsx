@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PublicKey } from "@solana/web3.js";
 import { usePNLUserData } from "../hooks/usePNLUserData";
 import { AccountsPositionsPanel } from "../components/accounts/Accounts";
+import { TransactionToasts } from "../components/TransactionToasts";
 
 export default function SearchPage() {
   const [walletAddress, setWalletAddress] = useState("");
@@ -61,44 +62,59 @@ export default function SearchPage() {
 
   return (
     <main className="container mx-auto p-4">
-      <div className="mb-8 bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-6 text-neutrals-100 dark:text-neutrals-10">
-        <h1 className="text-2xl font-bold mb-4">Wallet Search</h1>
-        <p className="mb-4">
-          Enter a Solana wallet address to view its sub-accounts
-        </p>
+      <TransactionToasts />
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+        {/* Search panel - appears first on mobile, right on desktop */}
+        <div className="md:col-span-4 md:order-2">
+          <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-6 text-neutrals-100 dark:text-neutrals-10">
+            <h1 className="text-2xl mb-4">Wallet Search</h1>
+            <p className="mb-4">
+              Enter a Solana wallet address to view its sub-accounts
+            </p>
 
-        <div className="flex flex-col md:flex-row gap-2 mb-4">
-          <input
-            type="text"
-            value={walletAddress}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter wallet address"
-            className="flex-grow bg-neutrals-20 dark:bg-neutrals-70 rounded-md p-2 text-neutrals-100 dark:text-neutrals-10 border border-neutrals-30 dark:border-neutrals-60 focus:outline-none focus:ring-2 focus:ring-purple-50"
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-purple-50 hover:bg-purple-60 text-white px-4 py-2 rounded-md transition-colors"
-          >
-            Search
-          </button>
-        </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <input
+                type="text"
+                value={walletAddress}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter wallet address"
+                className="w-full bg-neutrals-20 dark:bg-neutrals-70 rounded-md p-2 text-neutrals-100 dark:text-neutrals-10 border border-neutrals-30 dark:border-neutrals-60 focus:outline-none focus:ring-2 focus:ring-purple-50"
+              />
+              <button
+                onClick={handleSearch}
+                className="w-full bg-purple-50 hover:bg-purple-60 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Search
+              </button>
+            </div>
 
-        {error && (
-          <div className="text-red-60 dark:text-red-30 mb-4">{error}</div>
-        )}
-      </div>
-
-      {publicKey && (
-        <div>
-          <div className="mb-4 bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-4 text-neutrals-100 dark:text-neutrals-10">
-            <h2 className="text-xl font-bold mb-2">Viewing Wallet</h2>
-            <p className="font-mono break-all">{publicKey.toString()}</p>
+            {error && (
+              <div className="text-red-60 dark:text-red-30 mb-4">{error}</div>
+            )}
           </div>
-
-          <WalletSubAccounts publicKey={publicKey} />
         </div>
-      )}
+
+        {/* Results panel - appears second on mobile, left on desktop */}
+        <div className="md:col-span-8 md:order-1">
+          {publicKey ? (
+            <div>
+              <div className="mb-4 bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-4 text-neutrals-100 dark:text-neutrals-10">
+                <h2 className="text-xl font-bold mb-2">Viewing Wallet</h2>
+                <p className="font-mono break-all">{publicKey.toString()}</p>
+              </div>
+
+              <WalletSubAccounts publicKey={publicKey} />
+            </div>
+          ) : (
+            <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-6 text-neutrals-100 dark:text-neutrals-10 h-40 flex items-center justify-center">
+              <p className="text-lg text-neutrals-60 dark:text-neutrals-40">
+                Search for a wallet address to view its sub-accounts
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
