@@ -76,9 +76,9 @@ export function AccountCard({
               disabled={processingTx === account.subAccountId}
               className={`px-3 py-1.5 rounded-md text-sm ${
                 processingTx === account.subAccountId
-                  ? "bg-green-50/70 cursor-not-allowed"
-                  : "bg-green-50 hover:bg-green-60"
-              } text-white transition-colors font-medium`}
+                  ? "bg-blue-100/70 cursor-not-allowed"
+                  : "bg-blue-100 hover:bg-blue-200"
+              } text-neutrals-100 transition-colors font-medium`}
             >
               Deposit
             </button>
@@ -92,9 +92,9 @@ export function AccountCard({
               disabled={processingTx === account.subAccountId}
               className={`px-3 py-1.5 rounded-md text-sm ${
                 processingTx === account.subAccountId
-                  ? "bg-red-50/70 cursor-not-allowed"
-                  : "bg-red-50 hover:bg-red-60"
-              } text-white transition-colors font-medium`}
+                  ? "bg-blue-100/70 cursor-not-allowed"
+                  : "bg-blue-100 hover:bg-blue-200"
+              } text-neutrals-100 transition-colors font-medium`}
             >
               Withdraw
             </button>
