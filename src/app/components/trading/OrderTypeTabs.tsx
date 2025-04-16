@@ -2,18 +2,14 @@ import { CustomDropdown } from "../CustomDropdown";
 import { useOrderType } from "@/app/hooks/trading";
 import { isTriggerOrderType } from "../modal/TradingModal.util";
 
-interface OrderTypeTabsProps {
-  marketIndex: number;
-}
-
-export const OrderTypeTabs = ({ marketIndex }: OrderTypeTabsProps) => {
+export const OrderTypeTabs = () => {
   const {
     activeTab,
     orderTabs,
     proOrderOptions,
     handleTabChange,
     handleProOrderSelect,
-  } = useOrderType(marketIndex);
+  } = useOrderType();
 
   return (
     <div className="flex border-b border-neutrals-20 dark:border-neutrals-70 mb-1 justify-between">

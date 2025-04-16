@@ -13,10 +13,10 @@ export enum OrderTypeOption {
 }
 
 export const distributionOptions: DropdownOption[] = [
-  { value: "ascending", label: "Ascending (Low to High)" },
-  { value: "descending", label: "Descending (High to Low)" },
+  { value: "ascending", label: "Ascending (Entry → Target)" },
+  { value: "descending", label: "Descending (Target → Entry)" },
   { value: "random", label: "Random" },
-  { value: "flat", label: "Flat" },
+  { value: "flat", label: "Flat (Evenly spaced)" },
 ];
 
 /**
@@ -266,4 +266,18 @@ export const shouldShowLimitPrice = (orderType: OrderTypeOption): boolean => {
     orderType === OrderTypeOption.LIMIT ||
     orderType === OrderTypeOption.STOP_LIMIT
   );
+};
+
+/**
+ * Limit USD value to 2 decimal places
+ */
+export const limitUsdValue = (value: number): number => {
+  return parseFloat(value.toFixed(2));
+};
+
+/**
+ * Limit size value to 6 decimal places
+ */
+export const limitSizeValue = (value: number): number => {
+  return parseFloat(value.toFixed(6));
 };

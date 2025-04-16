@@ -3,7 +3,6 @@ import { formatBN } from "../../utils/number";
 import { AccountSummary } from "./AccountSummary";
 import { PositionsTable } from "./PositionsTable";
 import { OrdersTable } from "./OrdersTable";
-import Image from "next/image";
 import { ChevronDownIcon } from "../../assets/icons";
 
 interface AccountCardProps {
@@ -64,7 +63,7 @@ export function AccountCard({
             <p className="text-xs text-neutrals-60 dark:text-neutrals-40">
               Net Value
             </p>
-            <p className="font-bold">{formatBN(account.netTotal, true)}</p>
+            <p className="font-bold">${formatBN(account.netTotal, true)}</p>
           </div>
           {!viewOnly && onDeposit && (
             <button

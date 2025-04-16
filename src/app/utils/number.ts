@@ -11,16 +11,21 @@ export const formatBN = (
 
   const fullStr = bn.toString();
   const precisionDigits = precision.toString().length - 1;
+  const isNegative = bn.isNeg();
 
-  const paddedStr = fullStr.padStart(precisionDigits + 1, "0");
+  // Remove negative sign for processing, we'll add it back later
+  const absFullStr = isNegative ? fullStr.substring(1) : fullStr;
+  const paddedStr = absFullStr.padStart(precisionDigits + 1, "0");
 
   const wholeStr = paddedStr.slice(0, -precisionDigits) || "0";
   const decimalStr = paddedStr.slice(-precisionDigits);
+
+  // Format the whole number part with commas
   let formattedWhole = wholeStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-  // Fix for negative decimals with zero in ones place (e.g. -0.4)
-  if (bn.isNeg() && (wholeStr === "-" || wholeStr === "-0")) {
-    formattedWhole = "-0";
+  // Add negative sign if number is negative
+  if (isNegative) {
+    formattedWhole = "-" + formattedWhole;
   }
 
   if (decimals === 0) {
@@ -32,9 +37,6 @@ export const formatBN = (
 
   // Remove trailing zeros
   decimalPart = decimalPart.replace(/0+$/, "");
-
-  console.log("decimalPart", decimalPart);
-  console.log("formattedWhole", formattedWhole);
 
   // Only add decimal point if there are decimal digits
   return decimalPart ? `${formattedWhole}.${decimalPart}` : formattedWhole;

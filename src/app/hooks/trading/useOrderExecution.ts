@@ -32,6 +32,7 @@ export const useOrderExecution = (
   const takeProfitOrderType = useTradingStore(
     (state) => state.takeProfitOrderType
   );
+
   const takeProfitLimitPrice = useTradingStore(
     (state) => state.takeProfitLimitPrice
   );
@@ -63,54 +64,27 @@ export const useOrderExecution = (
 
   const { getTxStatus } = useTransactions();
 
-  // Open confirmation modal
   const handlePlaceOrder = useCallback(() => {
     setShowConfirmation(true);
   }, [setShowConfirmation]);
 
-  // Close confirmation modal
   const handleCloseConfirmation = useCallback(() => {
     setShowConfirmation(false);
   }, [setShowConfirmation]);
 
-  // Execute order after confirmation
   const executeOrder = useCallback(async () => {
-    // No need to convert from BN, numbers are already in the correct format
     const sizeNum = size;
     const priceNum = price ?? undefined;
     const triggerPriceNum = triggerPrice ?? undefined;
-    const direction =
-      selectedDirection === PositionDirection.LONG
-        ? PositionDirection.LONG
-        : PositionDirection.SHORT;
+    const direction = selectedDirection;
 
     try {
       setOrderSubmitted(true);
       let result;
 
-      // Check if TP/SL are enabled
-      if (
-        (enableTakeProfit || enableStopLoss) &&
-        !isMarketTriggerOrderType(selectedCustomOrderType) &&
-        !isLimitTriggerOrderType(selectedCustomOrderType)
-      ) {
-        const tpPrice =
-          takeProfitPrice !== null
-            ? takeProfitPrice
-            : priceNum && selectedDirection === PositionDirection.LONG
-            ? priceNum * 1.1
-            : priceNum
-            ? priceNum * 0.9
-            : undefined;
-
-        const slPrice =
-          stopLossPrice !== null
-            ? stopLossPrice
-            : priceNum && selectedDirection === PositionDirection.LONG
-            ? priceNum * 0.9
-            : priceNum
-            ? priceNum * 1.1
-            : undefined;
+      if (enableTakeProfit || enableStopLoss) {
+        const tpPrice = takeProfitPrice;
+        const slPrice = stopLossPrice;
 
         const params = {
           marketIndex,
@@ -118,8 +92,7 @@ export const useOrderExecution = (
           size: sizeNum,
           price: priceNum,
           orderType: selectedOrderType,
-          oraclePriceOffset:
-            selectedOrderType === OrderType.ORACLE ? 0.05 : undefined,
+          oraclePriceOffset: undefined,
           takeProfit:
             enableTakeProfit && tpPrice
               ? {
@@ -153,8 +126,18 @@ export const useOrderExecution = (
         selectedCustomOrderType === OrderTypeOption.LIMIT &&
         priceNum
       ) {
-        const minPriceVal = minPrice !== null ? minPrice : priceNum * 0.95;
-        const maxPriceVal = maxPrice !== null ? maxPrice : priceNum * 1.05;
+        // For long positions, max should be current price, min should be lower
+        // For short positions, min should be current price, max should be higher
+        let minPriceVal, maxPriceVal;
+
+        if (direction === PositionDirection.LONG) {
+          minPriceVal = minPrice !== null ? minPrice : priceNum * 0.95;
+          maxPriceVal = maxPrice !== null ? maxPrice : priceNum;
+        } else {
+          // SHORT position
+          minPriceVal = minPrice !== null ? minPrice : priceNum;
+          maxPriceVal = maxPrice !== null ? maxPrice : priceNum * 1.05;
+        }
 
         const scaleParams = {
           marketIndex,

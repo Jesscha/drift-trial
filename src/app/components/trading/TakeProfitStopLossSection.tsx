@@ -1,11 +1,20 @@
-import { OrderType, PositionDirection } from "@drift-labs/sdk";
+import { OrderType, PositionDirection, QUOTE_PRECISION } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   isTriggerOrderType,
   mapSDKToUIOrderType,
+  calculateTPSLPrices,
 } from "../modal/TradingModal.util";
+import { useEffect } from "react";
+import { useOraclePrice } from "@/app/hooks/useOraclePrice";
 
-export const TakeProfitStopLossSection = () => {
+interface TakeProfitStopLossSectionProps {
+  marketIndex?: number;
+}
+
+export const TakeProfitStopLossSection = ({
+  marketIndex = 0,
+}: TakeProfitStopLossSectionProps) => {
   // Get TP/SL related state and functions directly from the store
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
   const price = useTradingStore((state) => state.price);
@@ -32,7 +41,6 @@ export const TakeProfitStopLossSection = () => {
     (state) => state.setTakeProfitLimitPrice
   );
 
-  // Stop Loss state
   const enableStopLoss = useTradingStore((state) => state.enableStopLoss);
   const setEnableStopLoss = useTradingStore((state) => state.setEnableStopLoss);
   const stopLossPrice = useTradingStore((state) => state.stopLossPrice);
@@ -49,6 +57,51 @@ export const TakeProfitStopLossSection = () => {
   );
 
   const orderType = useTradingStore((state) => state.selectedOrderType);
+
+  // Get oracle price as backup
+  const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
+  const oraclePrice = oraclePriceBN
+    ? parseFloat(oraclePriceBN.div(QUOTE_PRECISION).toString())
+    : null;
+
+  // Use either direct price or oracle price
+  const effectivePrice = price || oraclePrice;
+
+  useEffect(() => {
+    if (effectivePrice) {
+      const {
+        takeProfitPrice: defaultTP,
+        stopLossPrice: defaultSL,
+        takeProfitLimitPrice: defaultTPLimit,
+        stopLossLimitPrice: defaultSLLimit,
+      } = calculateTPSLPrices(effectivePrice, selectedDirection);
+
+      if (enableTakeProfit && takeProfitPrice === null) {
+        setTakeProfitPrice(parseFloat(defaultTP.toFixed(2)));
+        setTakeProfitLimitPrice(parseFloat(defaultTPLimit.toFixed(2)));
+      }
+
+      if (enableStopLoss && stopLossPrice === null) {
+        setStopLossPrice(parseFloat(defaultSL.toFixed(2)));
+        setStopLossLimitPrice(parseFloat(defaultSLLimit.toFixed(2)));
+      }
+    }
+  }, [
+    enableTakeProfit,
+    enableStopLoss,
+    effectivePrice,
+    selectedDirection,
+    takeProfitPrice,
+    stopLossPrice,
+    takeProfitOrderType,
+    stopLossOrderType,
+    takeProfitLimitPrice,
+    stopLossLimitPrice,
+    setTakeProfitPrice,
+    setStopLossPrice,
+    setTakeProfitLimitPrice,
+    setStopLossLimitPrice,
+  ]);
 
   if (isTriggerOrderType(mapSDKToUIOrderType(orderType))) {
     return null;
@@ -142,16 +195,7 @@ export const TakeProfitStopLossSection = () => {
                     <div className="relative overflow-hidden bg-neutrals-0 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70">
                       <input
                         type="number"
-                        value={
-                          takeProfitPrice !== null
-                            ? takeProfitPrice
-                            : price
-                            ? (selectedDirection === PositionDirection.LONG
-                                ? price * 1.1
-                                : price * 0.9
-                              ).toFixed(2)
-                            : ""
-                        }
+                        value={takeProfitPrice !== null ? takeProfitPrice : ""}
                         onChange={(e) => {
                           if (!e.target.value) {
                             setTakeProfitPrice(null);
@@ -200,11 +244,6 @@ export const TakeProfitStopLossSection = () => {
                           value={
                             takeProfitLimitPrice !== null
                               ? takeProfitLimitPrice
-                              : takeProfitPrice !== null
-                              ? (selectedDirection === PositionDirection.LONG
-                                  ? takeProfitPrice * 0.99
-                                  : takeProfitPrice * 1.01
-                                ).toFixed(2)
                               : ""
                           }
                           onChange={(e) => {
@@ -250,16 +289,7 @@ export const TakeProfitStopLossSection = () => {
                     <div className="relative overflow-hidden bg-neutrals-0 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70">
                       <input
                         type="number"
-                        value={
-                          stopLossPrice !== null
-                            ? stopLossPrice
-                            : price
-                            ? (selectedDirection === PositionDirection.LONG
-                                ? price * 0.9
-                                : price * 1.1
-                              ).toFixed(2)
-                            : ""
-                        }
+                        value={stopLossPrice !== null ? stopLossPrice : ""}
                         onChange={(e) => {
                           if (!e.target.value) {
                             setStopLossPrice(null);
@@ -307,11 +337,6 @@ export const TakeProfitStopLossSection = () => {
                           value={
                             stopLossLimitPrice !== null
                               ? stopLossLimitPrice
-                              : stopLossPrice !== null
-                              ? (selectedDirection === PositionDirection.LONG
-                                  ? stopLossPrice * 0.99
-                                  : stopLossPrice * 1.01
-                                ).toFixed(2)
                               : ""
                           }
                           onChange={(e) => {

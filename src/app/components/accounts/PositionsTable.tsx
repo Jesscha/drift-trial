@@ -1,12 +1,7 @@
 import { formatBN } from "../../utils/number";
 import { getTokenIconUrl } from "../../utils/url";
 import { PerpPositionWithPNL } from "../../hooks/usePNLUserData";
-import {
-  BASE_PRECISION,
-  BN,
-  OrderType,
-  PositionDirection,
-} from "@drift-labs/sdk";
+import { BASE_PRECISION, PositionDirection } from "@drift-labs/sdk";
 import { usePerpOrder } from "../../hooks/usePerpOrder";
 import { useTransactions } from "../../hooks/useTransactions";
 import { useState } from "react";

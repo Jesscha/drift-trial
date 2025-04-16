@@ -22,7 +22,6 @@ import {
 export { TriggerCondition, getTriggerConditionObject };
 export type { PlacePerpOrderParams, OrderResult };
 
-// Interface for scale order configuration
 export type ScaleOrderDistribution =
   | "ascending"
   | "descending"
@@ -48,14 +47,12 @@ export interface OrderWithTPSLParams {
   orderType: OrderType;
   reduceOnly?: boolean;
   oraclePriceOffset?: number; // For oracle orders
-  // Take profit configuration
   takeProfit?: {
     price: number;
     size?: number; // If not provided, will use the entire position size
     orderType?: OrderType; // LIMIT or MARKET
     limitPrice?: number; // For TP limit orders
   };
-  // Stop loss configuration
   stopLoss?: {
     price: number;
     size?: number; // If not provided, will use the entire position size
@@ -339,63 +336,93 @@ export function usePerpOrder() {
       }
 
       try {
-        // Calculate price step and size per order
         const priceStep = (maxPrice - minPrice) / (numOrders - 1 || 1);
-        const sizePerOrder = size / numOrders;
+        const totalSize = size;
 
-        // Create array of order parameters with distribution patterns
         let orderParamsArray: PlacePerpOrderParams[];
 
         switch (distribution) {
           case "ascending":
-            // Price increases from min to max (default behavior)
-            orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
-              const price = minPrice + i * priceStep;
-              return {
-                marketIndex,
-                direction,
-                size: sizePerOrder,
-                price,
-                orderType: OrderType.LIMIT,
-                reduceOnly,
-              };
-            });
+            {
+              const weights = Array.from(
+                { length: numOrders },
+                (_, i) => i + 1
+              );
+              const weightSum = weights.reduce((sum, w) => sum + w, 0);
+
+              orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
+                const price = minPrice + i * priceStep;
+                const sizeRatio = weights[i] / weightSum;
+                const orderSize = sizeRatio * totalSize;
+
+                return {
+                  marketIndex,
+                  direction,
+                  size: orderSize,
+                  price,
+                  orderType: OrderType.LIMIT,
+                  reduceOnly,
+                };
+              });
+            }
             break;
 
           case "descending":
-            // Price decreases from max to min
-            orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
-              const price = maxPrice - i * priceStep;
-              return {
-                marketIndex,
-                direction,
-                size: sizePerOrder,
-                price,
-                orderType: OrderType.LIMIT,
-                reduceOnly,
-              };
-            });
+            {
+              const weights = Array.from(
+                { length: numOrders },
+                (_, i) => numOrders - i
+              );
+              const weightSum = weights.reduce((sum, w) => sum + w, 0);
+
+              orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
+                const price = minPrice + i * priceStep;
+                // Calculate proportional size based on position weight
+                const sizeRatio = weights[i] / weightSum;
+                const orderSize = sizeRatio * totalSize;
+
+                return {
+                  marketIndex,
+                  direction,
+                  size: orderSize,
+                  price,
+                  orderType: OrderType.LIMIT,
+                  reduceOnly,
+                };
+              });
+            }
             break;
 
           case "random":
-            // Random distribution between min and max
-            orderParamsArray = Array.from({ length: numOrders }, () => {
-              // Generate random price between min and max
-              const randomFactor = Math.random();
-              const price = minPrice + randomFactor * (maxPrice - minPrice);
-              return {
-                marketIndex,
-                direction,
-                size: sizePerOrder,
-                price,
-                orderType: OrderType.LIMIT,
-                reduceOnly,
-              };
-            });
+            {
+              const randomWeights = Array.from({ length: numOrders }, () =>
+                Math.random()
+              );
+              const weightSum = randomWeights.reduce(
+                (sum, weight) => sum + weight,
+                0
+              );
+
+              orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
+                const price = minPrice + i * priceStep;
+                const normalizedWeight = randomWeights[i] / weightSum;
+                const orderSize = normalizedWeight * totalSize;
+
+                return {
+                  marketIndex,
+                  direction,
+                  size: orderSize,
+                  price,
+                  orderType: OrderType.LIMIT,
+                  reduceOnly,
+                };
+              });
+            }
             break;
 
           case "flat":
-            // Flat distribution - evenly spaced prices but with equal size
+          default:
+            const sizePerOrder = totalSize / numOrders;
             orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
               const price = minPrice + i * priceStep;
               return {
@@ -408,20 +435,18 @@ export function usePerpOrder() {
               };
             });
             break;
+        }
 
-          default:
-            // Fallback to ascending
-            orderParamsArray = Array.from({ length: numOrders }, (_, i) => {
-              const price = minPrice + i * priceStep;
-              return {
-                marketIndex,
-                direction,
-                size: sizePerOrder,
-                price,
-                orderType: OrderType.LIMIT,
-                reduceOnly,
-              };
-            });
+        const totalOrderSize = orderParamsArray.reduce(
+          (sum, order) => sum + order.size,
+          0
+        );
+        if (Math.abs(totalOrderSize - totalSize) > 0.001) {
+          const scaleFactor = totalSize / totalOrderSize;
+          orderParamsArray = orderParamsArray.map((order) => ({
+            ...order,
+            size: order.size * scaleFactor,
+          }));
         }
 
         return placeOrdersWithTracking(orderParamsArray);
@@ -434,7 +459,6 @@ export function usePerpOrder() {
     [placeOrdersWithTracking]
   );
 
-  // Place an order with optional take profit and stop loss
   const placeOrderWithTPSL = useCallback(
     async (params: OrderWithTPSLParams): Promise<OrderResult> => {
       const {
@@ -450,7 +474,6 @@ export function usePerpOrder() {
       } = params;
 
       try {
-        // Create base order
         const orderParamsArray: PlacePerpOrderParams[] = [
           {
             marketIndex,
@@ -463,7 +486,6 @@ export function usePerpOrder() {
           },
         ];
 
-        // Add take profit order if specified
         if (takeProfit) {
           const tpDirection =
             direction === PositionDirection.LONG
@@ -490,7 +512,6 @@ export function usePerpOrder() {
           });
         }
 
-        // Add stop loss order if specified
         if (stopLoss) {
           const slDirection =
             direction === PositionDirection.LONG
@@ -539,7 +560,6 @@ export function usePerpOrder() {
         setIsLoading(true);
         setError(null);
 
-        // Call the cancel order function from the service
         const result = await cancelOrderService(orderId);
 
         if (result.success && result.txid) {
@@ -569,22 +589,18 @@ export function usePerpOrder() {
   );
 
   return {
-    // Basic order methods (from usePerpOrder)
     placeMarketOrder,
     placeLimitOrder,
     placeOracleOrder,
     placeTriggerMarketOrder,
     placeTriggerLimitOrder,
 
-    // Advanced order methods (from usePerpOrders)
     placeOrdersWithTracking,
     placeScaleOrders,
     placeOrderWithTPSL,
 
-    // Cancel order
     cancelOrder,
 
-    // State
     isLoading,
     error,
     lastResult,

@@ -1,17 +1,15 @@
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
-import { useOrderPrice } from "@/app/hooks/trading";
 
-interface TriggerConditionDropdownProps {
-  marketIndex: number;
-}
-
-export const TriggerConditionDropdown = ({
-  marketIndex,
-}: TriggerConditionDropdownProps) => {
+export const TriggerConditionDropdown = () => {
   const triggerCondition = useTradingStore((state) => state.triggerCondition);
-  const { handleTriggerConditionChange } = useOrderPrice(marketIndex);
+  const setTriggerCondition = useTradingStore(
+    (state) => state.setTriggerCondition
+  );
+  const handleTriggerConditionChange = (value: string | number) => {
+    setTriggerCondition(Number(value));
+  };
 
   return (
     <div>

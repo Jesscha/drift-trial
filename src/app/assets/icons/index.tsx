@@ -1,5 +1,5 @@
 import React from "react";
-import IconWrapper from "../../components/ui/IconWrapper";
+import IconWrapper from "../../components/IconWrapper";
 
 interface IconProps {
   className?: string;

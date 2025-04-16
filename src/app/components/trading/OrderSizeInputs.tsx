@@ -14,8 +14,6 @@ export const OrderSizeInputs = ({
   marketIndex,
 }: OrderSizeInputsProps) => {
   const {
-    size,
-    usdValue,
     sizePercentage,
     maxPositionSize,
     atMaxValue,
@@ -24,6 +22,9 @@ export const OrderSizeInputs = ({
     handleSizeChange,
     handleUsdValueChange,
   } = useOrderSize(marketIndex);
+
+  const size = useTradingStore((state) => state.size);
+  const usdValue = useTradingStore((state) => state.usdValue);
 
   const price = useTradingStore((state) => state.price);
   const isDisabled = price === 0;
@@ -52,9 +53,7 @@ export const OrderSizeInputs = ({
         >
           <input
             type="number"
-            value={
-              size !== null && size !== undefined ? size.toFixed(5) : "0.00000"
-            }
+            value={size}
             onChange={(e) => handleSizeChange(e.target.value)}
             className={`w-full h-10 px-3 py-2 bg-transparent text-sm ${
               atMaxValue
@@ -80,11 +79,7 @@ export const OrderSizeInputs = ({
         >
           <input
             type="number"
-            value={
-              usdValue !== null && usdValue !== undefined
-                ? usdValue.toFixed(2)
-                : "0.00"
-            }
+            value={usdValue}
             onChange={(e) => handleUsdValueChange(e.target.value)}
             className={`w-full h-10 px-3 py-2 bg-transparent text-sm ${
               atMaxValue

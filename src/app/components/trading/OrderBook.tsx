@@ -68,7 +68,7 @@ export const OrderBook: React.FC<OrderBookProps> = ({
 
   const handlePriceClick = (price: string) => {
     if (onPriceClick) {
-      onPriceClick(parseInt(price));
+      onPriceClick(parseInt(price) / 1e6);
     }
   };
 

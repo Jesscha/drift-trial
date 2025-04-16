@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import ThemeToggle from "../ThemeToggle";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Header() {
-  const { publicKey, connected } = useWallet();
   const [searchWallet, setSearchWallet] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +25,14 @@ export default function Header() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // Function to determine if a link is active
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(path);
+  };
+
   return (
     <header className="bg-neutrals-10 dark:bg-neutrals-80 p-4 shadow-md text-neutrals-100 dark:text-neutrals-10">
       <div className="container mx-auto">
@@ -35,7 +42,7 @@ export default function Header() {
             href="/"
             className="text-neutrals-100 dark:text-neutrals-0 text-2xl font-bold hover:opacity-90"
           >
-            Drift Protocol
+            Drift Dashboard
           </Link>
 
           {/* Mobile menu button */}
@@ -70,7 +77,11 @@ export default function Header() {
                 <li>
                   <Link
                     href="/"
-                    className="text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50 transition-colors"
+                    className={`transition-colors ${
+                      isActive("/")
+                        ? "text-purple-50 font-medium border-b-2 border-purple-50"
+                        : "text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50"
+                    }`}
                   >
                     Dashboard
                   </Link>
@@ -78,7 +89,11 @@ export default function Header() {
                 <li>
                   <Link
                     href="/search"
-                    className="text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50 transition-colors"
+                    className={`transition-colors ${
+                      isActive("/search")
+                        ? "text-purple-50 font-medium border-b-2 border-purple-50"
+                        : "text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50"
+                    }`}
                   >
                     Wallet Search
                   </Link>
@@ -122,7 +137,11 @@ export default function Header() {
               <li>
                 <Link
                   href="/"
-                  className="block py-2 text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50 transition-colors"
+                  className={`block py-2 transition-colors ${
+                    isActive("/")
+                      ? "text-purple-50 font-medium border-l-4 border-purple-50 pl-2"
+                      : "text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50"
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Dashboard
@@ -131,7 +150,11 @@ export default function Header() {
               <li>
                 <Link
                   href="/search"
-                  className="block py-2 text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50 transition-colors"
+                  className={`block py-2 transition-colors ${
+                    isActive("/search")
+                      ? "text-purple-50 font-medium border-l-4 border-purple-50 pl-2"
+                      : "text-neutrals-90 dark:text-neutrals-20 hover:text-purple-50"
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Wallet Search

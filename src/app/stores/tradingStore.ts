@@ -1,10 +1,7 @@
 import { create } from "zustand";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
-import {
-  OrderTypeOption,
-  mapSDKToUIOrderType,
-} from "../components/modal/TradingModal.util";
+import { OrderTypeOption } from "../components/modal/TradingModal.util";
 
 interface TradingState {
   // Order size and price state
@@ -85,13 +82,6 @@ interface TradingState {
 
   setActiveTab: (tab: OrderTypeOption) => void;
 
-  // Initialize state
-  initializeState: (
-    orderSize?: number,
-    initialOrderType?: OrderType,
-    initialOrderDirection?: PositionDirection
-  ) => void;
-
   // Reset state
   resetState: () => void;
 }
@@ -170,22 +160,34 @@ export const useTradingStore = create<TradingState>((set) => ({
 
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  // Initialize state
-  initializeState: (orderSize, initialOrderType, initialOrderDirection) =>
-    set({
-      size: orderSize || 1,
-      selectedOrderType: initialOrderType || OrderType.MARKET,
-      selectedDirection: initialOrderDirection || PositionDirection.LONG,
-      activeTab: initialOrderType
-        ? mapSDKToUIOrderType(initialOrderType)
-        : OrderTypeOption.MARKET,
-    }),
-
   // Reset state
   resetState: () =>
     set({
+      size: 1.0,
+      price: null,
+      usdValue: 0,
+      sizePercentage: 50,
+      selectedOrderType: OrderType.MARKET,
+      selectedCustomOrderType: OrderTypeOption.MARKET,
+      selectedDirection: PositionDirection.LONG,
+      triggerPrice: null,
+      triggerCondition: TriggerCondition.ABOVE,
+      useScaleOrders: false,
+      numScaleOrders: 5,
+      minPrice: null,
+      maxPrice: null,
+      scaleDistribution: "ascending",
+      enableTakeProfit: false,
+      takeProfitPrice: null,
+      takeProfitOrderType: OrderType.MARKET,
+      takeProfitLimitPrice: null,
+      enableStopLoss: false,
+      stopLossPrice: null,
+      stopLossOrderType: OrderType.MARKET,
+      stopLossLimitPrice: null,
       orderSubmitted: false,
       orderTxid: null,
       showConfirmation: false,
+      activeTab: OrderTypeOption.MARKET,
     }),
 }));

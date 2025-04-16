@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { OrderType } from "@drift-labs/sdk";
+import { useCallback, useMemo } from "react";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { DropdownOption } from "@/app/components/CustomDropdown";
 import { distributionOptions } from "@/app/components/modal/TradingModal.util";
@@ -56,6 +56,7 @@ export const useOrderFeatures = () => {
   const setScaleDistribution = useTradingStore(
     (state) => state.setScaleDistribution
   );
+  const selectedDirection = useTradingStore((state) => state.selectedDirection);
 
   // Toggle TP/SL states
   const toggleTakeProfit = useCallback(() => {
@@ -85,6 +86,28 @@ export const useOrderFeatures = () => {
     },
     [setStopLossOrderType]
   );
+
+  // Create direction-specific distribution options
+  const directionSpecificDistributionOptions = useMemo(() => {
+    const isLong = selectedDirection === PositionDirection.LONG;
+
+    return [
+      {
+        value: "ascending",
+        label: isLong
+          ? "Ascending (Lower → Entry)"
+          : "Ascending (Entry → Higher)",
+      },
+      {
+        value: "descending",
+        label: isLong
+          ? "Descending (Entry → Lower)"
+          : "Descending (Higher → Entry)",
+      },
+      { value: "random", label: "Random" },
+      { value: "flat", label: "Flat (Evenly spaced)" },
+    ];
+  }, [selectedDirection]);
 
   // Handle distribution type selection
   const handleDistributionChange = useCallback(
@@ -164,35 +187,6 @@ export const useOrderFeatures = () => {
     [setStopLossLimitPrice]
   );
 
-  // Scale orders price input handlers
-  const handleMinPriceChange = useCallback(
-    (value: string) => {
-      if (!value) {
-        setMinPrice(null);
-        return;
-      }
-      const price = parseFloat(value);
-      if (!isNaN(price)) {
-        setMinPrice(price);
-      }
-    },
-    [setMinPrice]
-  );
-
-  const handleMaxPriceChange = useCallback(
-    (value: string) => {
-      if (!value) {
-        setMaxPrice(null);
-        return;
-      }
-      const price = parseFloat(value);
-      if (!isNaN(price)) {
-        setMaxPrice(price);
-      }
-    },
-    [setMaxPrice]
-  );
-
   // Initialize TP/SL prices
   const initializeTPSLPrices = useCallback(
     (tpPrice: number | null, slPrice: number | null) => {
@@ -223,7 +217,7 @@ export const useOrderFeatures = () => {
     scaleDistribution,
 
     // Distribution options (for dropdown)
-    distributionOptions,
+    distributionOptions: directionSpecificDistributionOptions,
 
     // Action handlers
     toggleTakeProfit,
@@ -237,8 +231,6 @@ export const useOrderFeatures = () => {
     handleTakeProfitLimitPriceChange,
     handleStopLossPriceChange,
     handleStopLossLimitPriceChange,
-    handleMinPriceChange,
-    handleMaxPriceChange,
     initializeTPSLPrices,
   };
 };

@@ -27,7 +27,7 @@ export function PortfolioSummary({
               Total Deposits
             </p>
             <p className="font-medium text-xl">
-              {formatBN(totalDepositAmount, true)}
+              ${formatBN(totalDepositAmount, true)}
             </p>
           </div>
           <div className="flex flex-col">
@@ -43,7 +43,7 @@ export function PortfolioSummary({
                   : "text-green-50"
               }`}
             >
-              {formatBN(totalUnsettledPnl, true)}
+              ${formatBN(totalUnsettledPnl, true)}
             </p>
           </div>
           <div className="flex flex-col">
@@ -51,7 +51,7 @@ export function PortfolioSummary({
               Net Value
             </p>
             <p className="font-medium text-xl">
-              {formatBN(totalNetValue, true)}
+              ${formatBN(totalNetValue, true)}
             </p>
           </div>
         </div>

@@ -10,6 +10,8 @@ interface OraclePriceCache {
 // Cache map to store prices for different market indices
 const perpOraclePriceCache: Map<number, OraclePriceCache> = new Map();
 const spotOraclePriceCache: Map<number, OraclePriceCache> = new Map();
+// Simple cache for market symbols
+const marketSymbolCache: Map<number, string> = new Map();
 const CACHE_TTL_MS = 3000; // 3 seconds
 
 /**
@@ -36,6 +38,46 @@ export const getSpotMarketAccounts = (): SpotMarketAccount[] | null => {
   const marketAccount = client.getSpotMarketAccounts();
 
   return marketAccount;
+};
+
+/**
+ * Gets the symbol/name for a market based on its index
+ * @param marketIndex The index of the market
+ * @returns The market symbol or a default name if not found
+ */
+export const getMarketSymbol = (marketIndex: number): string => {
+  // Check cache first
+  const cachedSymbol = marketSymbolCache.get(marketIndex);
+  if (cachedSymbol) {
+    return cachedSymbol;
+  }
+
+  const client = driftService.getClient();
+  if (!client) return `Market #${marketIndex}`;
+
+  try {
+    // Get from perp markets
+    const perpMarkets = client.getPerpMarketAccounts();
+    const perpMarket = perpMarkets.find(
+      (market) => market.marketIndex === marketIndex
+    );
+
+    if (perpMarket && perpMarket.name) {
+      const name = String.fromCharCode(
+        ...perpMarket.name.filter((byte: number) => byte !== 0)
+      ).trim();
+
+      // Cache the result only on success
+      marketSymbolCache.set(marketIndex, name);
+
+      return name;
+    }
+  } catch (err) {
+    // Silent failure
+  }
+
+  // Return a default if not found (without caching the failure)
+  return `Market #${marketIndex}`;
 };
 
 /**

@@ -44,17 +44,21 @@ const TriggerConditionSelect = ({
 };
 
 export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
-  const {
-    price,
-    setPrice,
-    triggerPrice,
-    setTriggerPrice,
-    triggerCondition,
-    handlePriceClick,
-    handleTriggerConditionChange,
-    setOracleAsPrice,
-    setOracleAsTriggerPrice,
-  } = useOrderPrice(marketIndex);
+  const { setOracleAsPrice, setOracleAsTriggerPrice } =
+    useOrderPrice(marketIndex);
+  const price = useTradingStore((state) => state.price);
+  const setPrice = useTradingStore((state) => state.setPrice);
+  const triggerPrice = useTradingStore((state) => state.triggerPrice);
+  const setTriggerPrice = useTradingStore((state) => state.setTriggerPrice);
+  const triggerCondition = useTradingStore((state) => state.triggerCondition);
+  const setTriggerCondition = useTradingStore(
+    (state) => state.setTriggerCondition
+  );
+
+  const handleTriggerConditionChange = (value: string | number) => {
+    setTriggerCondition(Number(value));
+  };
+
   const selectedCustomOrderType = useTradingStore(
     (state) => state.selectedCustomOrderType
   );
@@ -63,7 +67,6 @@ export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
 
   return (
     <>
-      {/* Trigger Price section for Stop orders and Take Profit orders*/}
       {triggerPrice !== null && isTriggerOrderType(selectedCustomOrderType) && (
         <>
           <div className="text-sm text-neutrals-80 dark:text-neutrals-30 mb-1">

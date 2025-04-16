@@ -186,8 +186,6 @@ class TxTrackerService extends EventEmitter {
       const actions = Array.from(this.actionQueue);
       this.actionQueue.clear();
 
-      console.log(`Processing batched actions: ${actions.join(", ")}`);
-
       if (actions.includes(TransactionSuccessActionType.REFRESH_ALL)) {
         this.emit("action:refreshAll");
       } else {

@@ -1,13 +1,13 @@
 import {
   OrderType,
   PositionDirection,
-  BN,
   OrderTriggerCondition,
   MarketType,
   OrderParams,
   DefaultOrderParams,
 } from "@drift-labs/sdk";
 import driftService from "./client";
+import { getMarketSymbol } from "./market";
 
 export interface PlacePerpOrderParams {
   marketIndex: number;
@@ -157,15 +157,9 @@ export const placePerpOrder = async (
     );
     const txid = tx.toString();
 
-    const market =
-      client.getPerpMarketAccount(marketIndex)?.name ||
-      `Market #${marketIndex}`;
     const directionText = direction === PositionDirection.LONG ? "Buy" : "Sell";
-    const orderTypeText = getOrderTypeLabel(orderType);
-    const triggerText = triggerPrice ? ` (Trigger: ${triggerPrice})` : "";
-    const priceText = price ? `@${price}` : "at market";
-
-    const description = `${directionText} ${size} ${market} ${orderTypeText} ${priceText}${triggerText}`;
+    const symbol = getMarketSymbol(marketIndex);
+    const description = `${directionText} ${size.toFixed(5)} ${symbol}`;
 
     return { success: true, txid, description };
   } catch (err) {
@@ -280,7 +274,6 @@ export const placeTriggerLimitOrder = async (
 export const placeOrders = async (
   orderParamsArray: PlacePerpOrderParams[]
 ): Promise<OrderResult> => {
-  console.log("Step 1: Validating client and account");
   const client = driftService.getClient();
   if (!client) {
     const error = new Error("Drift client not initialized");
@@ -288,7 +281,6 @@ export const placeOrders = async (
   }
 
   try {
-    console.log("Step 2: Processing multiple orders");
     const driftOrderParams = orderParamsArray.map((params) => {
       const {
         marketIndex,
@@ -361,40 +353,22 @@ export const placeOrders = async (
       return orderParams;
     });
 
-    console.log("Step 3: Placing multiple orders", driftOrderParams);
     const tx = await client.placeOrders(driftOrderParams);
-    console.log("Step 4: Orders placed", tx);
     const txid = tx.toString();
 
-    console.log("Step 5: Creating transaction description");
     // Create a description that summarizes all orders
     const orderDescriptions = orderParamsArray.map((params) => {
-      const {
-        marketIndex,
-        direction,
-        size,
-        price,
-        orderType = OrderType.LIMIT,
-        triggerPrice,
-      } = params;
-
-      const market =
-        client.getPerpMarketAccount(marketIndex)?.name ||
-        `Market #${marketIndex}`;
+      const { direction, size, marketIndex } = params;
       const directionText =
         direction === PositionDirection.LONG ? "Buy" : "Sell";
-      const orderTypeText = getOrderTypeLabel(orderType);
-      const triggerText = triggerPrice ? ` (Trigger: ${triggerPrice})` : "";
-      const priceText = price ? `@${price}` : "at market";
-
-      return `${directionText} ${size} ${market} ${orderTypeText} ${priceText}${triggerText}`;
+      const symbol = getMarketSymbol(marketIndex);
+      return `${directionText} ${size.toFixed(5)} ${symbol}`;
     });
 
     const description = `Multiple Orders: ${orderDescriptions.join(", ")}`;
 
     return { success: true, txid, description };
   } catch (err) {
-    console.log("Step 6: Handling error", err);
     const error = err instanceof Error ? err : new Error(String(err));
     return { success: false, error };
   }

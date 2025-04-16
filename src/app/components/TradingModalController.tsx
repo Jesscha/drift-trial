@@ -6,6 +6,7 @@ import { TradingModal } from "./modal/TradingModal";
 import { CustomDropdown, DropdownOption } from "./CustomDropdown";
 import { usePNLUserData } from "../hooks/usePNLUserData";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useTradingStore } from "../stores/tradingStore";
 
 export const TradingModalController = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,6 +14,7 @@ export const TradingModalController = () => {
     PositionDirection.LONG
   );
   const [selectedMarketIndex, setSelectedMarketIndex] = useState(0);
+  const resetState = useTradingStore((state) => state.resetState);
 
   const { marketsList, isLoading: isLoadingMarkets } = usePerpMarketAccounts();
 
@@ -135,13 +137,18 @@ export const TradingModalController = () => {
         </button>
       </div>
 
-      <TradingModal
-        marketIndex={selectedMarketIndex}
-        orderDirection={orderDirection}
-        orderType={OrderType.MARKET}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {isModalOpen && (
+        <TradingModal
+          marketIndex={selectedMarketIndex}
+          orderDirection={orderDirection}
+          orderType={OrderType.MARKET}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            resetState();
+          }}
+        />
+      )}
     </div>
   );
 };

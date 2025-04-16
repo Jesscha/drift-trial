@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface ConfirmCancelModalProps {
   isOpen: boolean;
   onClose: () => void;

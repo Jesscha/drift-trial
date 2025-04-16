@@ -1,14 +1,10 @@
-import { OrderType } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
 import { useOrderFeatures } from "@/app/hooks/trading";
+import { useEffect } from "react";
 
-interface ScaleOrdersSectionProps {
-  marketIndex: number;
-}
-
-export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
-  // Get scale orders related state and functions directly from the store
+export const ScaleOrdersSection = () => {
   const useScaleOrders = useTradingStore((state) => state.useScaleOrders);
   const setUseScaleOrders = useTradingStore((state) => state.setUseScaleOrders);
   const numScaleOrders = useTradingStore((state) => state.numScaleOrders);
@@ -19,12 +15,37 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
   const setMaxPrice = useTradingStore((state) => state.setMaxPrice);
   const scaleDistribution = useTradingStore((state) => state.scaleDistribution);
   const price = useTradingStore((state) => state.price);
-  const orderType = useTradingStore((state) => state.selectedOrderType);
+  const selectedDirection = useTradingStore((state) => state.selectedDirection);
 
-  // Get distribution options and handler from useOrderFeatures
   const { distributionOptions, handleDistributionChange } = useOrderFeatures();
 
-  if (orderType !== OrderType.LIMIT) return null;
+  // Determine if inputs should be readonly based on position direction
+  const isLongPosition = selectedDirection === PositionDirection.LONG;
+
+  useEffect(() => {
+    if (price && useScaleOrders) {
+      if (selectedDirection === PositionDirection.LONG) {
+        setMaxPrice(price);
+        if (minPrice === null) {
+          setMinPrice(price * 0.95);
+        }
+      } else {
+        // SHORT position
+        setMinPrice(price);
+        if (maxPrice === null) {
+          setMaxPrice(price * 1.05);
+        }
+      }
+    }
+  }, [
+    price,
+    useScaleOrders,
+    minPrice,
+    maxPrice,
+    setMinPrice,
+    setMaxPrice,
+    selectedDirection,
+  ]);
 
   return (
     <div>
@@ -62,10 +83,15 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
             </div>
           </div>
         </div>
-
-        {/* Content area for Scale Orders settings */}
         {useScaleOrders && (
           <div className="p-3">
+            {/* Direction-specific explanation */}
+            <div className="mb-2 text-xs text-neutrals-60 dark:text-neutrals-40">
+              {isLongPosition
+                ? "For long positions, orders will scale from lowest price to entry price."
+                : "For short positions, orders will scale from entry price to highest price."}
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <div className="text-xs text-neutrals-80 dark:text-neutrals-30 mb-1">
@@ -77,9 +103,7 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
                     value={numScaleOrders}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
-                      if (value > 0) {
-                        setNumScaleOrders(value);
-                      }
+                      setNumScaleOrders(value);
                     }}
                     min="2"
                     max="10"
@@ -90,13 +114,19 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
 
               <div>
                 <div className="text-xs text-neutrals-80 dark:text-neutrals-30 mb-1">
-                  Start Price
+                  {isLongPosition ? "Lowest Price" : "Entry Price"}
                 </div>
                 <div className="relative overflow-hidden bg-neutrals-0 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70">
                   <input
                     type="number"
                     value={
-                      minPrice !== null ? minPrice : price ? price * 0.95 : ""
+                      isLongPosition
+                        ? minPrice !== null
+                          ? minPrice
+                          : price
+                          ? price * 0.95
+                          : ""
+                        : price || ""
                     }
                     onChange={(e) => {
                       if (!e.target.value) {
@@ -105,21 +135,30 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
                       }
                       setMinPrice(parseFloat(e.target.value));
                     }}
-                    placeholder="Min"
-                    className="w-full h-8 px-2 py-1 bg-transparent text-xs text-neutrals-100 dark:text-neutrals-0 focus:outline-none placeholder:text-neutrals-60 dark:placeholder:text-neutrals-40"
+                    readOnly={!isLongPosition}
+                    placeholder={isLongPosition ? "Min" : "Entry"}
+                    className={`w-full h-8 px-2 py-1 bg-transparent text-xs text-neutrals-100 dark:text-neutrals-0 focus:outline-none placeholder:text-neutrals-60 dark:placeholder:text-neutrals-40 ${
+                      !isLongPosition ? "opacity-75" : ""
+                    }`}
                   />
                 </div>
               </div>
 
               <div>
                 <div className="text-xs text-neutrals-80 dark:text-neutrals-30 mb-1">
-                  End Price
+                  {isLongPosition ? "Entry Price" : "Highest Price"}
                 </div>
                 <div className="relative overflow-hidden bg-neutrals-0 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70">
                   <input
                     type="number"
                     value={
-                      maxPrice !== null ? maxPrice : price ? price * 1.05 : ""
+                      isLongPosition
+                        ? price || ""
+                        : maxPrice !== null
+                        ? maxPrice
+                        : price
+                        ? price * 1.05
+                        : ""
                     }
                     onChange={(e) => {
                       if (!e.target.value) {
@@ -128,8 +167,11 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
                       }
                       setMaxPrice(parseFloat(e.target.value));
                     }}
-                    placeholder="Max"
-                    className="w-full h-8 px-2 py-1 bg-transparent text-xs text-neutrals-100 dark:text-neutrals-0 focus:outline-none placeholder:text-neutrals-60 dark:placeholder:text-neutrals-40"
+                    readOnly={isLongPosition}
+                    placeholder={isLongPosition ? "Entry" : "Max"}
+                    className={`w-full h-8 px-2 py-1 bg-transparent text-xs text-neutrals-100 dark:text-neutrals-0 focus:outline-none placeholder:text-neutrals-60 dark:placeholder:text-neutrals-40 ${
+                      isLongPosition ? "opacity-75" : ""
+                    }`}
                   />
                 </div>
               </div>
@@ -150,19 +192,9 @@ export const ScaleOrdersSection = ({}: ScaleOrdersSectionProps) => {
 
             <div className="text-xs text-blue-500 mt-2">
               {numScaleOrders} {numScaleOrders === 1 ? "order" : "orders"}{" "}
-              between{" "}
-              {minPrice !== null
-                ? minPrice
-                : price
-                ? (price * 0.95).toFixed(2)
-                : "..."}{" "}
-              and{" "}
-              {maxPrice !== null
-                ? maxPrice
-                : price
-                ? (price * 1.05).toFixed(2)
-                : "..."}{" "}
-              USD
+              {isLongPosition
+                ? "from lowest to entry price"
+                : "from entry to highest price"}
             </div>
           </div>
         )}

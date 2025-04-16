@@ -17,7 +17,7 @@ export function AccountSummary({
         <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
           Deposits
         </p>
-        <p className="font-medium text-lg">{formatBN(depositAmount, true)}</p>
+        <p className="font-medium text-lg">${formatBN(depositAmount, true)}</p>
       </div>
       <div className="flex flex-col">
         <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
@@ -32,14 +32,14 @@ export function AccountSummary({
               : "text-green-50"
           }`}
         >
-          {formatBN(netUnsettledPnl, true)}
+          ${formatBN(netUnsettledPnl, true)}
         </p>
       </div>
       <div className="flex flex-col">
         <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
           Net Value
         </p>
-        <p className="font-medium text-lg">{formatBN(netTotal, true)}</p>
+        <p className="font-medium text-lg">${formatBN(netTotal, true)}</p>
       </div>
     </div>
   );

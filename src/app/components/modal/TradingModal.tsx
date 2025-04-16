@@ -27,16 +27,14 @@ export const TradingModal = ({
   isOpen,
   onClose,
   marketIndex,
-  orderDirection: initialOrderDirection,
-  orderType: initialOrderType,
-  orderSize,
+  orderDirection,
+  orderType,
 }: {
   isOpen: boolean;
   onClose: () => void;
   marketIndex: number;
   orderDirection: PositionDirection;
   orderType: OrderType;
-  orderSize?: number;
 }) => {
   const { marketsList } = usePerpMarketAccounts();
   const { data, isLoading } = useOrderBook(marketsList[marketIndex]?.name);
@@ -44,36 +42,20 @@ export const TradingModal = ({
     (state) => state.selectedCustomOrderType
   );
 
-  const initializeState = useTradingStore((state) => state.initializeState);
-  const resetState = useTradingStore((state) => state.resetState);
+  const setOrderDirection = useTradingStore(
+    (state) => state.setSelectedDirection
+  );
+  const setOrderType = useTradingStore((state) => state.setSelectedOrderType);
 
   const { handlePriceClick } = useOrderPrice(marketIndex);
 
   const { showConfirmation, handleCloseConfirmation, executeOrder } =
     useOrderExecution(marketIndex, onClose);
 
-  const initializedRef = useRef(false);
-
   useEffect(() => {
-    if (isOpen && !initializedRef.current) {
-      initializedRef.current = true;
-      initializeState(orderSize, initialOrderType, initialOrderDirection);
-    } else if (!isOpen) {
-      initializedRef.current = false;
-    }
-  }, [
-    isOpen,
-    orderSize,
-    initialOrderType,
-    initialOrderDirection,
-    initializeState,
-  ]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      resetState();
-    }
-  }, [isOpen, resetState]);
+    setOrderDirection(orderDirection);
+    setOrderType(orderType);
+  }, [orderDirection, orderType]);
 
   return (
     <Modal
@@ -119,14 +101,14 @@ export const TradingModal = ({
         </div>
 
         <div className="flex-1 flex flex-col gap-4 ml-4 p-3 pt-0 bg-neutrals-5 dark:bg-neutrals-90 rounded-lg">
-          <OrderTypeTabs marketIndex={marketIndex} />
+          <OrderTypeTabs />
 
           <OrderDirectionToggle />
 
           <OrderInputSection marketIndex={marketIndex} />
 
           {isTriggerOrderType(selectedCustomOrderType) && (
-            <TriggerConditionDropdown marketIndex={marketIndex} />
+            <TriggerConditionDropdown />
           )}
 
           <OrderSizeInputs
@@ -135,10 +117,10 @@ export const TradingModal = ({
           />
 
           {selectedCustomOrderType === OrderTypeOption.LIMIT && (
-            <ScaleOrdersSection marketIndex={marketIndex} />
+            <ScaleOrdersSection />
           )}
 
-          <TakeProfitStopLossSection />
+          <TakeProfitStopLossSection marketIndex={marketIndex} />
 
           <OrderButton
             marketName={marketsList[marketIndex]?.name || ""}

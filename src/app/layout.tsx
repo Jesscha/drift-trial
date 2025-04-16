@@ -4,8 +4,12 @@ import Header from "./components/layout/Header";
 import { Providers } from "./providers/Providers";
 
 export const metadata: Metadata = {
-  title: "Drift Protocol Frontend",
-  description: "A frontend interface for the Drift Protocol",
+  title: "Drift Jesse's trial task",
+  description: "A frontend interface for the Drift",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

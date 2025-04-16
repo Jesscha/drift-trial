@@ -6,6 +6,8 @@ import {
   calculateSize,
   calculateUsdValue,
   isAtMaxValue,
+  limitUsdValue,
+  limitSizeValue,
 } from "@/app/components/modal/TradingModal.util";
 
 export const useOrderSize = (marketIndex: number) => {
@@ -69,11 +71,17 @@ export const useOrderSize = (marketIndex: number) => {
       if (maxPositionSize > 0 && oraclePrice) {
         // Calculate USD value based on percentage of max position size
         const newUsdValue = maxPositionSize * (percentage / 100);
-        setUsdValue(newUsdValue);
+        const limitedUsdValue = limitUsdValue(newUsdValue);
+
+        setUsdValue(limitedUsdValue);
 
         // Calculate new size based on USD value and price
-        const newSize = calculateSize(newUsdValue, oraclePrice);
-        setSize(newSize);
+        const newSize = calculateSize(limitedUsdValue, oraclePrice);
+
+        // Limit size to 6 decimal places
+        const newSizeLimited = limitSizeValue(newSize);
+
+        setSize(newSizeLimited);
       }
     },
     [maxPositionSize, oraclePrice, setSize, setUsdValue, setSizePercentage]
@@ -83,11 +91,13 @@ export const useOrderSize = (marketIndex: number) => {
   const handleSetMaxSize = useCallback(() => {
     if (maxPositionSize > 0 && oraclePrice) {
       // Set USD value to maximum position size
-      setUsdValue(maxPositionSize);
+      const limitedUsdValue = limitUsdValue(maxPositionSize);
+      setUsdValue(limitedUsdValue);
 
       // Calculate size based on USD value and price
-      const maxSize = calculateSize(maxPositionSize, oraclePrice);
-      setSize(maxSize);
+      const maxSize = calculateSize(limitedUsdValue, oraclePrice);
+      const limitedSize = limitSizeValue(maxSize);
+      setSize(limitedSize);
 
       // Set percentage to 100%
       setSizePercentage(100);
@@ -120,6 +130,9 @@ export const useOrderSize = (marketIndex: number) => {
         // Recalculate size based on capped USD value
         newSize = calculateSize(newUsdValue, currentPrice);
       }
+
+      // Limit size to 6 decimal places
+      newSize = limitSizeValue(newSize);
 
       setSize(newSize);
       setUsdValue(newUsdValue);
@@ -161,11 +174,14 @@ export const useOrderSize = (marketIndex: number) => {
         newUsdValue = maxPositionSize;
       }
 
-      setUsdValue(newUsdValue);
+      const limitedUsdValue = limitUsdValue(newUsdValue);
+
+      setUsdValue(limitedUsdValue);
 
       // Calculate new size based on USD value and current price
-      const newSize = calculateSize(newUsdValue, currentPrice);
-      setSize(newSize);
+      const newSize = calculateSize(limitedUsdValue, currentPrice);
+      const limitedSize = limitSizeValue(newSize);
+      setSize(limitedSize);
 
       // Update percentage based on new USD value
       if (maxPositionSize > 0) {
@@ -216,8 +232,6 @@ export const useOrderSize = (marketIndex: number) => {
   );
 
   return {
-    size,
-    usdValue,
     sizePercentage,
     maxPositionSize,
     atMaxValue,
