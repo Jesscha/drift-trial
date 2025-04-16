@@ -6,17 +6,20 @@ import { usePerpOrder } from "../../hooks/usePerpOrder";
 import { useTransactions } from "../../hooks/useTransactions";
 import { ConfirmCancelModal } from "./ConfirmCancelModal";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
+import { CancelIcon } from "../../assets/icons";
 
 interface OrdersTableProps {
   orders: any[];
   markets: any;
   isLoadingMarkets: boolean;
+  viewOnly?: boolean;
 }
 
 export function OrdersTable({
   orders,
   markets,
   isLoadingMarkets,
+  viewOnly = false,
 }: OrdersTableProps) {
   const { cancelOrder, isLoading, error } = usePerpOrder();
   const { trackTransaction } = useTransactions();
@@ -91,7 +94,7 @@ export function OrdersTable({
 
   if (orders.length === 0) {
     return (
-      <div className="py-4 text-center text-neutrals-60 dark:text-neutrals-40">
+      <div className="py-6 text-center text-neutrals-60 dark:text-neutrals-40">
         <p>No open orders for this account.</p>
       </div>
     );
@@ -99,18 +102,24 @@ export function OrdersTable({
 
   return (
     <>
-      <table className="min-w-full text-sm">
+      <table className="min-w-full">
         <thead>
-          <tr className="text-neutrals-60 dark:text-neutrals-40 border-b border-neutrals-30 dark:border-neutrals-60">
-            <th className="text-left py-2 px-4">Market</th>
-            <th className="text-left py-2 px-4">Type</th>
-            <th className="text-left py-2 px-4">Size</th>
-            <th className="text-left py-2 px-4">Trigger / Limit</th>
-            <th className="text-left py-2 px-4">Flags</th>
-            <th className="text-right py-2 px-4">Action</th>
+          <tr className="text-neutrals-60 dark:text-neutrals-40 border-b border-neutrals-20 dark:border-neutrals-70">
+            <th className="text-left py-3 px-4 font-medium text-xs">Market</th>
+            <th className="text-left py-3 px-4 font-medium text-xs">Type</th>
+            <th className="text-left py-3 px-4 font-medium text-xs">Size</th>
+            <th className="text-left py-3 px-4 font-medium text-xs">
+              Trigger / Limit
+            </th>
+            <th className="text-left py-3 px-4 font-medium text-xs">Flags</th>
+            {!viewOnly && (
+              <th className="text-right py-3 px-4 font-medium text-xs">
+                Action
+              </th>
+            )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm">
           {orders.map((order) => {
             const marketData = markets[order.marketIndex];
             const isLimit =
@@ -123,15 +132,15 @@ export function OrdersTable({
             return (
               <tr
                 key={order.orderId}
-                className="border-b border-neutrals-30/30 dark:border-neutrals-60/30"
+                className="border-b border-neutrals-20/20 dark:border-neutrals-70/20 hover:bg-neutrals-10/50 dark:hover:bg-neutrals-80/50"
               >
-                <td className="py-3 px-4">
+                <td className="py-2 px-4">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 mr-2 flex-shrink-0">
+                    <div className="w-6 h-6 mr-2 flex-shrink-0 bg-neutrals-5 dark:bg-neutrals-90 rounded-full flex items-center justify-center">
                       <img
                         src={getTokenIconUrl(marketData?.name?.split("-")[0])}
                         alt={marketData?.name || `Market #${order.marketIndex}`}
-                        className="w-full h-full object-contain"
+                        className="w-4 h-4 object-contain"
                         onError={(e) => {
                           // Fallback to default icon if image fails to load
                           (
@@ -143,9 +152,11 @@ export function OrdersTable({
                       />
                     </div>
                     <div className="flex flex-col">
-                      {isLoadingMarkets
-                        ? `Market #${order.marketIndex}`
-                        : marketData?.name || `Market #${order.marketIndex}`}
+                      <span className="font-medium text-sm">
+                        {isLoadingMarkets
+                          ? `Market #${order.marketIndex}`
+                          : marketData?.name || `Market #${order.marketIndex}`}
+                      </span>
                       <div
                         className={`text-xs ${
                           order.direction && "long" in order.direction
@@ -160,62 +171,70 @@ export function OrdersTable({
                     </div>
                   </div>
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-2 px-4 font-medium text-sm">
                   {getOrderTypeDisplay(order.orderType)}
                 </td>
-                <td className="py-3 px-4 text-left">
-                  {formatBN(order.baseAssetAmountFilled, false, 4)} /{" "}
-                  {formatBN(order.baseAssetAmount, false, 4)}
-                </td>
-                <td className="py-3 px-4 text-left">
-                  {isTrigger ? formatBN(order.triggerPrice, true, 2) : "-"} /{" "}
-                  {isLimit ? formatBN(order.price, true, 2) : "-"}
-                </td>
-                <td className="py-3 px-4 text-left">
-                  {order.reduceOnly && (
-                    <span className="bg-blue-50/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-1">
-                      REDUCE ONLY
-                    </span>
-                  )}
-                  {order.postOnly && (
-                    <span className="bg-purple-50/20 text-purple-50 px-2 py-0.5 rounded text-xs mr-1">
-                      POST ONLY
-                    </span>
-                  )}
-                  {order.immediateOrCancel && (
-                    <span className="bg-orange-50/20 text-orange-50 px-2 py-0.5 rounded text-xs">
-                      IOC
-                    </span>
-                  )}
-                  {!order.reduceOnly &&
-                    !order.postOnly &&
-                    !order.immediateOrCancel &&
-                    "-"}
-                </td>
-                <td className="py-3 px-4 text-right">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      className="p-2 bg-neutrals-10 dark:bg-neutrals-60 rounded hover:bg-red-50/20"
-                      onClick={() => handleOpenCancelModal(order)}
-                      disabled={
-                        isLoading && cancelModalState.orderId === order.orderId
-                      }
-                    >
-                      <img
-                        src="/icons/trash.svg"
-                        alt="Cancel order"
-                        width={16}
-                        height={16}
-                        className={
-                          isLoading &&
-                          cancelModalState.orderId === order.orderId
-                            ? "text-red-50 animate-pulse"
-                            : ""
-                        }
-                      />
-                    </button>
+                <td className="py-2 px-4 text-left font-medium text-sm">
+                  <div>
+                    {formatBN(order.baseAssetAmountFilled, false, 4)} /{" "}
+                    {formatBN(order.baseAssetAmount, false, 4)}
                   </div>
                 </td>
+                <td className="py-2 px-4 text-left font-medium text-sm">
+                  <div>
+                    {isTrigger ? formatBN(order.triggerPrice, true, 2) : "-"} /{" "}
+                    {isLimit ? formatBN(order.price, true, 2) : "-"}
+                  </div>
+                </td>
+                <td className="py-2 px-4 text-left">
+                  <div className="flex flex-wrap gap-1">
+                    {order.reduceOnly && (
+                      <span className="bg-blue-50/10 text-blue-300 px-2 py-0.5 rounded text-xs">
+                        REDUCE
+                      </span>
+                    )}
+                    {order.postOnly && (
+                      <span className="bg-purple-50/10 text-purple-50 px-2 py-0.5 rounded text-xs">
+                        POST
+                      </span>
+                    )}
+                    {order.immediateOrCancel && (
+                      <span className="bg-orange-50/10 text-orange-50 px-2 py-0.5 rounded text-xs">
+                        IOC
+                      </span>
+                    )}
+                    {!order.reduceOnly &&
+                      !order.postOnly &&
+                      !order.immediateOrCancel &&
+                      "-"}
+                  </div>
+                </td>
+                {!viewOnly && (
+                  <td className="py-2 px-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        className="p-1.5 bg-neutrals-5 dark:bg-neutrals-90 rounded hover:bg-red-50/10 transition-colors"
+                        onClick={() => handleOpenCancelModal(order)}
+                        disabled={
+                          isLoading &&
+                          cancelModalState.orderId === order.orderId
+                        }
+                      >
+                        <div className="relative w-4 h-4">
+                          <CancelIcon
+                            size="sm"
+                            className={`text-red-50 ${
+                              isLoading &&
+                              cancelModalState.orderId === order.orderId
+                                ? "animate-pulse"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             );
           })}
@@ -223,13 +242,15 @@ export function OrdersTable({
       </table>
 
       {/* Confirmation Modal */}
-      <ConfirmCancelModal
-        isOpen={cancelModalState.isOpen}
-        onClose={handleCloseCancelModal}
-        onConfirm={handleConfirmCancel}
-        isLoading={isLoading}
-        orderDetails={cancelModalState.orderDetails}
-      />
+      {!viewOnly && (
+        <ConfirmCancelModal
+          isOpen={cancelModalState.isOpen}
+          onClose={handleCloseCancelModal}
+          onConfirm={handleConfirmCancel}
+          isLoading={isLoading}
+          orderDetails={cancelModalState.orderDetails}
+        />
+      )}
     </>
   );
 }

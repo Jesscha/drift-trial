@@ -10,7 +10,7 @@ import { useActiveAccount } from "./providers/ActiveAccountProvider";
 import { formatBN } from "./utils/number";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useState } from "react";
-import { AccountsPositionsPanel } from "./components/accounts-positions";
+import { AccountsPositionsPanel } from "./components/accounts";
 
 export default function Home() {
   const { publicKey, connected } = useWallet();

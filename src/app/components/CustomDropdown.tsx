@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { ChevronDownSmallIcon } from "../assets/icons";
 
 export interface DropdownOption {
   value: string | number;
@@ -128,22 +130,14 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
               </span>
             )}
           </div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-4 w-4 text-neutrals-60 transition-transform ${
-              isOpen ? "rotate-180" : ""
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
+          <div className="relative h-4 w-4">
+            <ChevronDownSmallIcon
+              size="sm"
+              className={`text-neutrals-60 transition-transform ${
+                isOpen ? "rotate-180" : ""
+              }`}
             />
-          </svg>
+          </div>
         </div>
 
         {/* Dropdown options */}

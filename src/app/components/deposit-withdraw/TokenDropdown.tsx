@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { getTokenIconUrl } from "@/app/utils/url";
 import { DropdownOption } from "../CustomDropdown";
 import { TransactionMode } from "@/app/stores/depositWithdrawStore";
+import Image from "next/image";
+import { ChevronDownSmallIcon, CheckIcon } from "../../assets/icons";
 
 interface TokenDropdownProps {
   tokenSymbol: string; // This is the symbol of the token from tokenSelectionInfo.symbol
@@ -83,19 +85,14 @@ export const TokenDropdown = ({
           }}
         />
         <span>{token}</span>
-        <svg
-          className="ml-1.5 w-4 h-4 text-neutrals-60 dark:text-neutrals-40"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
+        <div className="ml-1.5 relative w-4 h-4">
+          <ChevronDownSmallIcon
+            size="sm"
+            className={`text-neutrals-60 dark:text-neutrals-40 transition-transform ${
+              isTokenDropdownOpen ? "rotate-180" : ""
+            }`}
           />
-        </svg>
+        </div>
       </button>
 
       {/* Dropdown menu */}
@@ -180,17 +177,9 @@ export const TokenDropdown = ({
                     )}
                 </div>
                 {isSelected && (
-                  <svg
-                    className="ml-auto w-4 h-4 text-purple-50"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <div className="ml-auto relative w-4 h-4">
+                    <CheckIcon size="sm" className="text-purple-50" />
+                  </div>
                 )}
               </button>
             );

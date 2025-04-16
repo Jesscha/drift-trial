@@ -12,19 +12,19 @@ export function AccountSummary({
   netTotal,
 }: AccountSummaryProps) {
   return (
-    <div className="grid grid-cols-3 gap-4 mb-4 bg-neutrals-10/50 dark:bg-neutrals-80/50 p-3 rounded-lg">
-      <div>
-        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm">
+    <div className="grid grid-cols-3 gap-5 bg-neutrals-10 dark:bg-neutrals-80 p-4 rounded-lg">
+      <div className="flex flex-col">
+        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
           Deposits
         </p>
-        <p className="font-bold">{formatBN(depositAmount, true)}</p>
+        <p className="font-medium text-lg">{formatBN(depositAmount, true)}</p>
       </div>
-      <div>
-        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm">
+      <div className="flex flex-col">
+        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
           Unsettled PnL
         </p>
         <p
-          className={`font-bold ${
+          className={`font-medium text-lg ${
             netUnsettledPnl.isNeg()
               ? "text-red-50"
               : netUnsettledPnl.isZero()
@@ -35,11 +35,11 @@ export function AccountSummary({
           {formatBN(netUnsettledPnl, true)}
         </p>
       </div>
-      <div>
-        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm">
+      <div className="flex flex-col">
+        <p className="text-neutrals-60 dark:text-neutrals-40 text-sm mb-1.5">
           Net Value
         </p>
-        <p className="font-bold">{formatBN(netTotal, true)}</p>
+        <p className="font-medium text-lg">{formatBN(netTotal, true)}</p>
       </div>
     </div>
   );

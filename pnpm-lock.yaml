@@ -38,6 +38,9 @@ importers:
       add:
         specifier: ^2.0.6
         version: 2.0.6
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       crypto:
         specifier: ^1.0.1
         version: 1.0.1

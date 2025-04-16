@@ -12,17 +12,20 @@ import { useTransactions } from "../../hooks/useTransactions";
 import { useState } from "react";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 import { ConfirmCloseModal } from "./ConfirmCloseModal";
+import { TrashIcon } from "../../assets/icons";
 
 interface PositionsTableProps {
   positions: PerpPositionWithPNL[];
   markets: any;
   isLoadingMarkets: boolean;
+  viewOnly?: boolean;
 }
 
 export function PositionsTable({
   positions,
   markets,
   isLoadingMarkets,
+  viewOnly = false,
 }: PositionsTableProps) {
   const { placeMarketOrder, isLoading } = usePerpOrder();
   const { trackTransaction } = useTransactions();
@@ -43,7 +46,7 @@ export function PositionsTable({
 
   if (positions.length === 0) {
     return (
-      <div className="py-4 text-center text-neutrals-60 dark:text-neutrals-40">
+      <div className="py-6 text-center text-neutrals-60 dark:text-neutrals-40">
         <p>No open positions for this account.</p>
       </div>
     );
@@ -122,17 +125,23 @@ export function PositionsTable({
 
   return (
     <>
-      <table className="min-w-full text-sm">
+      <table className="min-w-full">
         <thead>
-          <tr className="text-neutrals-60 dark:text-neutrals-40 border-b border-neutrals-30 dark:border-neutrals-60">
-            <th className="text-left py-2 px-4">Market</th>
-            <th className="text-left py-2 px-4">Size</th>
-            <th className="text-left py-2 px-4">Entry/Oracle</th>
-            <th className="text-left py-2 px-4">P&L</th>
-            <th className="text-right py-2 px-4">Action</th>
+          <tr className="text-neutrals-60 dark:text-neutrals-40 border-b border-neutrals-20 dark:border-neutrals-70">
+            <th className="text-left py-3 px-4 font-medium text-xs">Market</th>
+            <th className="text-left py-3 px-4 font-medium text-xs">Size</th>
+            <th className="text-left py-3 px-4 font-medium text-xs">
+              Entry/Oracle
+            </th>
+            <th className="text-left py-3 px-4 font-medium text-xs">P&L</th>
+            {!viewOnly && (
+              <th className="text-right py-3 px-4 font-medium text-xs">
+                Action
+              </th>
+            )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm">
           {positions.map((position) => {
             const marketData = markets[position.marketIndex];
             const isLong = position.baseAssetAmount.gt(0);
@@ -158,21 +167,21 @@ export function PositionsTable({
             return (
               <tr
                 key={position.marketIndex}
-                className="border-b border-neutrals-30/30 dark:border-neutrals-60/30"
+                className="border-b border-neutrals-20/20 dark:border-neutrals-70/20 hover:bg-neutrals-10/50 dark:hover:bg-neutrals-80/50"
               >
                 <td className="py-3 px-4">
                   {isLoadingMarkets ? (
-                    `Loading market #${position.marketIndex}...`
+                    <div className="animate-pulse h-6 w-24 bg-neutrals-20 dark:bg-neutrals-70 rounded"></div>
                   ) : (
                     <div className="flex items-center">
-                      <div className="w-6 h-6 mr-2 flex-shrink-0">
+                      <div className="w-7 h-7 mr-2.5 flex-shrink-0 bg-neutrals-5 dark:bg-neutrals-90 rounded-full flex items-center justify-center">
                         <img
                           src={getTokenIconUrl(marketData?.name?.split("-")[0])}
                           alt={
                             marketData?.name ||
                             `Market #${position.marketIndex}`
                           }
-                          className="w-full h-full object-contain"
+                          className="w-5 h-5 object-contain"
                           onError={(e) => {
                             (
                               e.target as HTMLImageElement
@@ -182,30 +191,38 @@ export function PositionsTable({
                           }}
                         />
                       </div>
-                      {marketData?.name || `Market #${position.marketIndex}`}
+                      <span className="font-medium">
+                        {marketData?.name || `Market #${position.marketIndex}`}
+                      </span>
                     </div>
                   )}
                 </td>
                 <td className="py-3 px-4 text-left">
-                  <div className={isLong ? "text-green-50" : "text-red-50"}>
+                  <div
+                    className={
+                      isLong
+                        ? "text-green-50 font-medium"
+                        : "text-red-50 font-medium"
+                    }
+                  >
                     {isLong ? "Long" : "Short"}{" "}
                     {formatBN(position.baseAssetAmount.abs(), false, 4)}
                   </div>
-                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40">
-                    $ {formatBN(position.quoteAssetAmount.abs(), true, 2)}
+                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40 mt-0.5">
+                    ${formatBN(position.quoteAssetAmount.abs(), true, 2)}
                   </div>
                 </td>
                 <td className="py-3 px-4 text-left">
-                  <div>${entryPrice}</div>
-                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40">
+                  <div className="font-medium">${entryPrice}</div>
+                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40 mt-0.5">
                     ${oraclePrice}
                   </div>
                 </td>
-                <td className={`py-3 px-4 text-left ${pnlClass}`}>
+                <td className={`py-3 px-4 text-left ${pnlClass} font-medium`}>
                   {position.unsettledPnl
                     ? `$${formatBN(position.unsettledPnl, true)}`
                     : "N/A"}
-                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40">
+                  <div className="text-xs text-neutrals-60 dark:text-neutrals-40 mt-0.5 font-normal">
                     {position.unsettledPnl && position.quoteAssetAmount
                       ? `${(
                           (position.unsettledPnl.toNumber() /
@@ -215,31 +232,33 @@ export function PositionsTable({
                       : "N/A"}
                   </div>
                 </td>
-                <td className="py-3 px-4 text-right">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      className="p-2 bg-neutrals-10 dark:bg-neutrals-60 rounded hover:bg-red-50/20"
-                      onClick={() => handleOpenCloseModal(position)}
-                      disabled={
-                        isLoading &&
-                        closingPositionMarketIndex === position.marketIndex
-                      }
-                    >
-                      <img
-                        src="/icons/trash.svg"
-                        alt="Close position"
-                        width={16}
-                        height={16}
-                        className={
+                {!viewOnly && (
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        className="p-2 bg-neutrals-5 dark:bg-neutrals-90 rounded hover:bg-red-50/10 transition-colors"
+                        onClick={() => handleOpenCloseModal(position)}
+                        disabled={
                           isLoading &&
                           closingPositionMarketIndex === position.marketIndex
-                            ? "animate-pulse"
-                            : ""
                         }
-                      />
-                    </button>
-                  </div>
-                </td>
+                      >
+                        <div className="relative w-4 h-4">
+                          <TrashIcon
+                            size="sm"
+                            className={`text-red-50 ${
+                              isLoading &&
+                              closingPositionMarketIndex ===
+                                position.marketIndex
+                                ? "animate-pulse"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             );
           })}
@@ -247,13 +266,15 @@ export function PositionsTable({
       </table>
 
       {/* Confirmation Modal */}
-      <ConfirmCloseModal
-        isOpen={closeModalState.isOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmClose}
-        isLoading={isLoading}
-        positionDetails={closeModalState.positionDetails}
-      />
+      {!viewOnly && (
+        <ConfirmCloseModal
+          isOpen={closeModalState.isOpen}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmClose}
+          isLoading={isLoading}
+          positionDetails={closeModalState.positionDetails}
+        />
+      )}
     </>
   );
 }
