@@ -5,7 +5,7 @@ import { Modal } from "./Modal";
 import { useOrderBook } from "@/app/hooks/useOrderBook";
 import { usePerpMarketAccounts } from "@/app/hooks/usePerpMarketAccounts";
 import { OrderBook } from "../trading/OrderBook";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   formatMarketName,
@@ -55,7 +55,7 @@ export const TradingModal = ({
   useEffect(() => {
     setOrderDirection(orderDirection);
     setOrderType(orderType);
-  }, [orderDirection, orderType]);
+  }, [orderDirection, orderType, setOrderDirection, setOrderType]);
 
   return (
     <Modal

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { ChevronDownSmallIcon } from "../assets/icons";
 
 export interface DropdownOption {
@@ -19,7 +18,6 @@ interface CustomDropdownProps {
   className?: string;
   dropdownClassName?: string;
   optionClassName?: string;
-  showSelectedIcon?: boolean;
   renderOption?: (option: DropdownOption) => React.ReactNode;
   onIconError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
 }
@@ -34,7 +32,6 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   className = "",
   dropdownClassName = "",
   optionClassName = "",
-  showSelectedIcon = true,
   renderOption,
   onIconError,
 }) => {
