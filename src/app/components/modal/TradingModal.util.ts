@@ -128,19 +128,19 @@ export const getDefaultTriggerCondition = (
   if (
     (orderType === OrderTypeOption.STOP_MARKET ||
       orderType === OrderTypeOption.STOP_LIMIT) &&
-    direction === "long"
+    direction === PositionDirection.LONG
   ) {
     return TriggerCondition.BELOW;
   } else if (
     (orderType === OrderTypeOption.TAKE_PROFIT ||
       orderType === OrderTypeOption.TAKE_PROFIT_LIMIT) &&
-    direction === "long"
+    direction === PositionDirection.LONG
   ) {
     return TriggerCondition.ABOVE;
   } else if (
     (orderType === OrderTypeOption.STOP_MARKET ||
       orderType === OrderTypeOption.STOP_LIMIT) &&
-    direction === "short"
+    direction === PositionDirection.SHORT
   ) {
     return TriggerCondition.ABOVE;
   } else {
@@ -155,7 +155,7 @@ export const calculateTPSLPrices = (
   currentPrice: number,
   direction: PositionDirection
 ) => {
-  if (direction === "long") {
+  if (direction === PositionDirection.LONG) {
     // For long: TP above entry, SL below entry
     return {
       takeProfitPrice: currentPrice * 1.1,

@@ -22,9 +22,6 @@ interface DepositWithdrawModalProps {
   initialMode?: "deposit" | "withdraw";
   marketIndex?: number;
   initialSubaccountId?: number;
-  onTxStart?: () => void;
-  onTxComplete?: () => void;
-  walletBalance?: number;
 }
 
 export function DepositWithdrawModal({

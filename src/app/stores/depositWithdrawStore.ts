@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { BN } from "@drift-labs/sdk";
 import { USDC_MINT } from "@/constants";
 
 export enum TransactionMode {

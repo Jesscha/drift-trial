@@ -10,7 +10,7 @@ import { useWalletTokenBalances } from "@/app/hooks/useWalletTokenBalances";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { BN } from "@drift-labs/sdk";
 import { formatBN } from "../../utils/number";
-import { getTokenIconUrl } from "@/app/components/modal/DepositWithdrawModal.util";
+import { getTokenIconUrl } from "@/app/utils/url";
 
 /**
  * Hook for managing all data-related aspects of deposit/withdraw functionality

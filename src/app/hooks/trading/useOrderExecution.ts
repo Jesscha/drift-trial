@@ -80,7 +80,7 @@ export const useOrderExecution = (
     const priceNum = price ?? undefined;
     const triggerPriceNum = triggerPrice ?? undefined;
     const direction =
-      selectedDirection === "long"
+      selectedDirection === PositionDirection.LONG
         ? PositionDirection.LONG
         : PositionDirection.SHORT;
 
@@ -97,7 +97,7 @@ export const useOrderExecution = (
         const tpPrice =
           takeProfitPrice !== null
             ? takeProfitPrice
-            : priceNum && selectedDirection === "long"
+            : priceNum && selectedDirection === PositionDirection.LONG
             ? priceNum * 1.1
             : priceNum
             ? priceNum * 0.9
@@ -106,7 +106,7 @@ export const useOrderExecution = (
         const slPrice =
           stopLossPrice !== null
             ? stopLossPrice
-            : priceNum && selectedDirection === "long"
+            : priceNum && selectedDirection === PositionDirection.LONG
             ? priceNum * 0.9
             : priceNum
             ? priceNum * 1.1

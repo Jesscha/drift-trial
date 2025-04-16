@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useDriftClient } from "../../hooks/useDriftClient";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import ThemeToggle from "../ThemeToggle";
 
 export default function Header() {
   const { publicKey, connected } = useWallet();
-  const { isLoading } = useDriftClient();
   const [searchWallet, setSearchWallet] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would fetch data for the entered wallet
   };
 
   return (

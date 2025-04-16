@@ -16,7 +16,12 @@ export const formatBN = (
 
   const wholeStr = paddedStr.slice(0, -precisionDigits) || "0";
   const decimalStr = paddedStr.slice(-precisionDigits);
-  const formattedWhole = wholeStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  let formattedWhole = wholeStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // Fix for negative decimals with zero in ones place (e.g. -0.4)
+  if (bn.isNeg() && (wholeStr === "-" || wholeStr === "-0")) {
+    formattedWhole = "-0";
+  }
 
   if (decimals === 0) {
     return formattedWhole;
@@ -27,6 +32,9 @@ export const formatBN = (
 
   // Remove trailing zeros
   decimalPart = decimalPart.replace(/0+$/, "");
+
+  console.log("decimalPart", decimalPart);
+  console.log("formattedWhole", formattedWhole);
 
   // Only add decimal point if there are decimal digits
   return decimalPart ? `${formattedWhole}.${decimalPart}` : formattedWhole;

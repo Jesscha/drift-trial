@@ -8,7 +8,6 @@ import {
   DefaultOrderParams,
 } from "@drift-labs/sdk";
 import driftService from "./client";
-import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 
 export interface PlacePerpOrderParams {
   marketIndex: number;
@@ -396,6 +395,23 @@ export const placeOrders = async (
     return { success: true, txid, description };
   } catch (err) {
     console.log("Step 6: Handling error", err);
+    const error = err instanceof Error ? err : new Error(String(err));
+    return { success: false, error };
+  }
+};
+
+export const cancelOrder = async (orderId: number): Promise<OrderResult> => {
+  const client = driftService.getClient();
+  if (!client) {
+    const error = new Error("Drift client not initialized");
+    return { success: false, error };
+  }
+
+  try {
+    const tx = await client.cancelOrder(orderId);
+    const txid = tx.toString();
+    return { success: true, txid };
+  } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
     return { success: false, error };
   }

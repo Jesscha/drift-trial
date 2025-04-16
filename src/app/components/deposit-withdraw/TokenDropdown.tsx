@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { getTokenIconUrl } from "../modal/DepositWithdrawModal.util";
+import { getTokenIconUrl } from "@/app/utils/url";
 import { DropdownOption } from "../CustomDropdown";
 import { TransactionMode } from "@/app/stores/depositWithdrawStore";
 

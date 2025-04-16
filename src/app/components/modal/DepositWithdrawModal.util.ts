@@ -18,26 +18,6 @@ export const formatValue = (
 };
 
 /**
- * Get token icon URL with special case for BONK
- */
-export const getTokenIconUrl = (tokenSymbol: string | undefined) => {
-  // Handle undefined or empty token symbol
-  if (!tokenSymbol)
-    return "https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/drift.svg";
-
-  // Convert token symbol to lowercase and trim
-  const symbol = tokenSymbol.toLowerCase().trim();
-
-  // Special case for BONK token
-  if (symbol === "bonk") {
-    return "https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/bonk.webp";
-  }
-
-  // Default case for all other tokens
-  return `https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/${symbol}.svg`;
-};
-
-/**
  * Calculate percentage for the slider based on amount and max value
  */
 export const calculatePercentage = (

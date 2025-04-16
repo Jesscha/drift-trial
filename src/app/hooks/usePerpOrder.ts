@@ -16,6 +16,7 @@ import {
   placeOracleOrder as serviceOracleOrder,
   placeTriggerMarketOrder as serviceTriggerMarketOrder,
   placeTriggerLimitOrder as serviceTriggerLimitOrder,
+  cancelOrder as cancelOrderService,
 } from "@/services/drift/order";
 
 export { TriggerCondition, getTriggerConditionObject };
@@ -526,6 +527,47 @@ export function usePerpOrder() {
     [placeOrdersWithTracking]
   );
 
+  const cancelOrder = useCallback(
+    async (orderId: number): Promise<OrderResult> => {
+      if (!client) {
+        const error = new Error("Drift client not initialized");
+        setError(error);
+        return { success: false, error };
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Call the cancel order function from the service
+        const result = await cancelOrderService(orderId);
+
+        if (result.success && result.txid) {
+          const orderResult = {
+            success: true,
+            txid: result.txid,
+            description: `Cancel Order #${orderId}`,
+          };
+          setLastResult(orderResult);
+          return orderResult;
+        }
+
+        return {
+          success: false,
+          error:
+            result.error || new Error("Failed to get transaction signature"),
+        };
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        return { success: false, error };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [client]
+  );
+
   return {
     // Basic order methods (from usePerpOrder)
     placeMarketOrder,
@@ -538,6 +580,9 @@ export function usePerpOrder() {
     placeOrdersWithTracking,
     placeScaleOrders,
     placeOrderWithTPSL,
+
+    // Cancel order
+    cancelOrder,
 
     // State
     isLoading,

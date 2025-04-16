@@ -78,9 +78,8 @@ export function usePNLUserData(
 
         for (const position of account.perpPositions) {
           if (
-            !position.baseAssetAmount.isZero() ||
-            !position.quoteAssetAmount.isZero() ||
-            !position.lpShares.isZero()
+            !position.baseAssetAmount.isZero() &&
+            !position.quoteAssetAmount.isZero()
           ) {
             const oraclePrice = await getPerpOraclePrice(position.marketIndex);
 

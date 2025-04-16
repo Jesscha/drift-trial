@@ -1,4 +1,4 @@
-import { OrderType } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   isTriggerOrderType,
@@ -146,7 +146,7 @@ export const TakeProfitStopLossSection = () => {
                           takeProfitPrice !== null
                             ? takeProfitPrice
                             : price
-                            ? (selectedDirection === "long"
+                            ? (selectedDirection === PositionDirection.LONG
                                 ? price * 1.1
                                 : price * 0.9
                               ).toFixed(2)
@@ -201,7 +201,7 @@ export const TakeProfitStopLossSection = () => {
                             takeProfitLimitPrice !== null
                               ? takeProfitLimitPrice
                               : takeProfitPrice !== null
-                              ? (selectedDirection === "long"
+                              ? (selectedDirection === PositionDirection.LONG
                                   ? takeProfitPrice * 0.99
                                   : takeProfitPrice * 1.01
                                 ).toFixed(2)
@@ -222,8 +222,10 @@ export const TakeProfitStopLossSection = () => {
                   )}
 
                   <div className="text-xs text-green-500">
-                    {selectedDirection === "long" ? "Sell" : "Buy"} at{" "}
-                    {takeProfitPrice || "price"} USD
+                    {selectedDirection === PositionDirection.LONG
+                      ? "Sell"
+                      : "Buy"}{" "}
+                    at {takeProfitPrice || "price"} USD
                     {takeProfitOrderType === OrderType.LIMIT
                       ? ` with limit ${takeProfitLimitPrice || "price"} USD`
                       : ""}
@@ -252,7 +254,7 @@ export const TakeProfitStopLossSection = () => {
                           stopLossPrice !== null
                             ? stopLossPrice
                             : price
-                            ? (selectedDirection === "long"
+                            ? (selectedDirection === PositionDirection.LONG
                                 ? price * 0.9
                                 : price * 1.1
                               ).toFixed(2)
@@ -306,7 +308,7 @@ export const TakeProfitStopLossSection = () => {
                             stopLossLimitPrice !== null
                               ? stopLossLimitPrice
                               : stopLossPrice !== null
-                              ? (selectedDirection === "long"
+                              ? (selectedDirection === PositionDirection.LONG
                                   ? stopLossPrice * 0.99
                                   : stopLossPrice * 1.01
                                 ).toFixed(2)
@@ -327,8 +329,10 @@ export const TakeProfitStopLossSection = () => {
                   )}
 
                   <div className="text-xs text-red-500">
-                    {selectedDirection === "long" ? "Sell" : "Buy"} at{" "}
-                    {stopLossPrice || "price"} USD
+                    {selectedDirection === PositionDirection.LONG
+                      ? "Sell"
+                      : "Buy"}{" "}
+                    at {stopLossPrice || "price"} USD
                     {stopLossOrderType === OrderType.LIMIT
                       ? ` with limit ${stopLossLimitPrice || "price"} USD`
                       : ""}
