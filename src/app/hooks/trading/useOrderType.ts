@@ -41,7 +41,7 @@ export const useOrderType = () => {
   const proOrderTypes = [
     OrderTypeOption.STOP_MARKET,
     OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT,
+    OrderTypeOption.TAKE_PROFIT_MARKET,
     OrderTypeOption.TAKE_PROFIT_LIMIT,
   ];
 

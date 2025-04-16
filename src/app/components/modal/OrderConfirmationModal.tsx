@@ -109,7 +109,7 @@ export const OrderConfirmationModal = ({
                 } ${triggerPrice}`
               : "";
           break;
-        case OrderTypeOption.TAKE_PROFIT:
+        case OrderTypeOption.TAKE_PROFIT_MARKET:
           detailDescription =
             triggerPrice && triggerCondition !== undefined
               ? `Take Profit when ${

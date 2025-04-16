@@ -8,7 +8,7 @@ export enum OrderTypeOption {
   LIMIT = "Limit",
   STOP_MARKET = "Stop Market",
   STOP_LIMIT = "Stop Limit",
-  TAKE_PROFIT = "Take Profit",
+  TAKE_PROFIT_MARKET = "Take Profit Market",
   TAKE_PROFIT_LIMIT = "Take Profit Limit",
 }
 
@@ -29,7 +29,7 @@ export const getSDKOrderType = (orderType: OrderTypeOption): OrderType => {
     case OrderTypeOption.LIMIT:
       return OrderType.LIMIT;
     case OrderTypeOption.STOP_MARKET:
-    case OrderTypeOption.TAKE_PROFIT:
+    case OrderTypeOption.TAKE_PROFIT_MARKET:
       return OrderType.TRIGGER_MARKET;
     case OrderTypeOption.STOP_LIMIT:
     case OrderTypeOption.TAKE_PROFIT_LIMIT:
@@ -106,7 +106,7 @@ export const getOrderTypeInfo = () => ({
     description: "Limit order when trigger price is reached",
     color: "text-purple-500",
   },
-  [OrderTypeOption.TAKE_PROFIT]: {
+  [OrderTypeOption.TAKE_PROFIT_MARKET]: {
     label: "Take Profit",
     description: "Market order to take profit at target price",
     color: "text-green-500",
@@ -132,7 +132,7 @@ export const getDefaultTriggerCondition = (
   ) {
     return TriggerCondition.BELOW;
   } else if (
-    (orderType === OrderTypeOption.TAKE_PROFIT ||
+    (orderType === OrderTypeOption.TAKE_PROFIT_MARKET ||
       orderType === OrderTypeOption.TAKE_PROFIT_LIMIT) &&
     direction === PositionDirection.LONG
   ) {
@@ -211,7 +211,7 @@ export const isTriggerOrderType = (orderType: OrderTypeOption): boolean => {
   return [
     OrderTypeOption.STOP_MARKET,
     OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT,
+    OrderTypeOption.TAKE_PROFIT_MARKET,
     OrderTypeOption.TAKE_PROFIT_LIMIT,
   ].includes(orderType);
 };
@@ -230,7 +230,7 @@ export const isStopOrderType = (orderType: OrderTypeOption): boolean => {
  */
 export const isTakeProfitOrderType = (orderType: OrderTypeOption): boolean => {
   return [
-    OrderTypeOption.TAKE_PROFIT,
+    OrderTypeOption.TAKE_PROFIT_MARKET,
     OrderTypeOption.TAKE_PROFIT_LIMIT,
   ].includes(orderType);
 };
@@ -241,9 +241,10 @@ export const isTakeProfitOrderType = (orderType: OrderTypeOption): boolean => {
 export const isMarketTriggerOrderType = (
   orderType: OrderTypeOption
 ): boolean => {
-  return [OrderTypeOption.STOP_MARKET, OrderTypeOption.TAKE_PROFIT].includes(
-    orderType
-  );
+  return [
+    OrderTypeOption.STOP_MARKET,
+    OrderTypeOption.TAKE_PROFIT_MARKET,
+  ].includes(orderType);
 };
 
 /**
