@@ -21,7 +21,7 @@ export interface PlacePerpOrderParams {
   auctionDuration?: number;
   maxTs?: number;
   triggerPrice?: number;
-  triggerCondition?: any;
+  triggerCondition?: TriggerCondition;
   reduceOnly?: boolean;
 }
 
@@ -228,7 +228,7 @@ export const placeTriggerMarketOrder = async (
   direction: PositionDirection,
   size: number,
   triggerPrice: number,
-  triggerCondition: any,
+  triggerCondition: TriggerCondition,
   reduceOnly: boolean = false
 ): Promise<OrderResult> => {
   return placePerpOrder({
@@ -251,7 +251,7 @@ export const placeTriggerLimitOrder = async (
   size: number,
   price: number,
   triggerPrice: number,
-  triggerCondition: any,
+  triggerCondition: TriggerCondition,
   reduceOnly: boolean = false
 ): Promise<OrderResult> => {
   return placePerpOrder({

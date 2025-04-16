@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from "react";
 import { getTokenIconUrl } from "@/app/utils/url";
 import { DropdownOption } from "../CustomDropdown";
 import { TransactionMode } from "@/app/stores/depositWithdrawStore";
-import Image from "next/image";
 import { ChevronDownSmallIcon, CheckIcon } from "../../assets/icons";
 
 interface TokenDropdownProps {
@@ -21,6 +20,13 @@ interface TokenDropdownProps {
   }[];
   selectedSubaccountId?: number;
   currentTokenMint?: string | null;
+}
+
+// Extended DropdownOption for tokens with balance info
+interface TokenOption extends DropdownOption {
+  balance?: number;
+  balanceFormatted?: string;
+  dollarValue?: number;
 }
 
 export const TokenDropdown = ({
@@ -116,7 +122,7 @@ export const TokenDropdown = ({
             const marketIndex = Number(option.value);
 
             // Get wallet balance if in deposit mode
-            const walletTokenBalance = option as any;
+            const walletTokenBalance = option as TokenOption;
 
             // Get subaccount balance if in withdraw mode
             let subaccountBalance = null;
@@ -160,10 +166,12 @@ export const TokenDropdown = ({
                   {/* Show appropriate balance based on mode */}
                   {mode === TransactionMode.DEPOSIT &&
                     walletTokenBalance &&
+                    walletTokenBalance.balance &&
                     walletTokenBalance.balance > 0 && (
                       <span className="text-xs text-neutrals-60 dark:text-neutrals-40">
                         {walletTokenBalance.balanceFormatted}
-                        {walletTokenBalance.dollarValue > 0 &&
+                        {walletTokenBalance.dollarValue &&
+                          walletTokenBalance.dollarValue > 0 &&
                           ` ($${walletTokenBalance.dollarValue.toFixed(2)})`}
                       </span>
                     )}

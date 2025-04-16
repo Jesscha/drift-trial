@@ -8,10 +8,11 @@ import { useState } from "react";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 import { ConfirmCloseModal } from "./ConfirmCloseModal";
 import { TrashIcon } from "../../assets/icons";
+import { MarketData } from "../../hooks/usePerpMarketAccounts";
 
 interface PositionsTableProps {
   positions: PerpPositionWithPNL[];
-  markets: any;
+  markets: Record<number, MarketData>;
   isLoadingMarkets: boolean;
   viewOnly?: boolean;
 }

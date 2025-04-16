@@ -53,7 +53,6 @@ export const useDepositWithdrawTransaction = ({
     ? transactions.find((tx) => tx.signature === txSignature)
     : null;
 
-  // Handle form submission
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
@@ -122,7 +121,12 @@ export const useDepositWithdrawTransaction = ({
   };
 
   // Helper function to extract signature from different response formats
-  const extractSignature = (result: any): string | undefined => {
+  const extractSignature = (
+    result:
+      | string
+      | { signature?: string; txid?: string; txSignature?: string }
+      | undefined
+  ): string | undefined => {
     if (!result) return undefined;
 
     if (typeof result === "string") {

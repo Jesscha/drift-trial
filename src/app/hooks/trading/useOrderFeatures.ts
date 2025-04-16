@@ -1,8 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import { DropdownOption } from "@/app/components/CustomDropdown";
-import { distributionOptions } from "@/app/components/modal/TradingModal.util";
 
 export const useOrderFeatures = () => {
   // Take Profit state
@@ -187,6 +185,35 @@ export const useOrderFeatures = () => {
     [setStopLossLimitPrice]
   );
 
+  // Handle scale price inputs
+  const handleMinPriceChange = useCallback(
+    (value: string) => {
+      if (!value) {
+        setMinPrice(null);
+        return;
+      }
+      const price = parseFloat(value);
+      if (!isNaN(price)) {
+        setMinPrice(price);
+      }
+    },
+    [setMinPrice]
+  );
+
+  const handleMaxPriceChange = useCallback(
+    (value: string) => {
+      if (!value) {
+        setMaxPrice(null);
+        return;
+      }
+      const price = parseFloat(value);
+      if (!isNaN(price)) {
+        setMaxPrice(price);
+      }
+    },
+    [setMaxPrice]
+  );
+
   // Initialize TP/SL prices
   const initializeTPSLPrices = useCallback(
     (tpPrice: number | null, slPrice: number | null) => {
@@ -231,6 +258,8 @@ export const useOrderFeatures = () => {
     handleTakeProfitLimitPriceChange,
     handleStopLossPriceChange,
     handleStopLossLimitPriceChange,
+    handleMinPriceChange,
+    handleMaxPriceChange,
     initializeTPSLPrices,
   };
 };

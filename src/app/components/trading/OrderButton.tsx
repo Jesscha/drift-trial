@@ -1,7 +1,6 @@
 import { PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { formatMarketName } from "../modal/TradingModal.util";
-import { formatBN } from "@/app/utils/number";
 import { useOrderExecution } from "@/app/hooks/trading";
 
 interface OrderButtonProps {
@@ -34,7 +33,7 @@ export const OrderButton = ({
       return "Submitting...";
     }
 
-    let buttonText = `${
+    const buttonText = `${
       selectedDirection === PositionDirection.LONG ? "Buy" : "Sell"
     } ${
       size !== null && size !== undefined ? size.toFixed(2) : "0.00"

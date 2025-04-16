@@ -14,13 +14,6 @@ const spotOraclePriceCache: Map<number, OraclePriceCache> = new Map();
 const marketSymbolCache: Map<number, string> = new Map();
 const CACHE_TTL_MS = 3000; // 3 seconds
 
-/**
- * Sleep function to wait between retries
- * @param ms Milliseconds to sleep
- */
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
 export const getPerpMarketAccounts = (): PerpMarketAccount[] | null => {
   const client = driftService.getClient();
   if (!client) throw new Error("Drift client not initialized");
@@ -73,7 +66,7 @@ export const getMarketSymbol = (marketIndex: number): string => {
       return name;
     }
   } catch (err) {
-    // Silent failure
+    console.warn(`Failed to get market symbol for market ${marketIndex}:`, err);
   }
 
   // Return a default if not found (without caching the failure)

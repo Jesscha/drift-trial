@@ -8,12 +8,13 @@ import {
   isTriggerOrderType,
 } from "./TradingModal.util";
 import { useTradingStore } from "@/app/stores/tradingStore";
+import { MarketData } from "@/app/hooks/usePerpMarketAccounts";
 
 interface OrderConfirmationModalProps {
   showConfirmation: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  marketsList: Array<{ name: string; [key: string]: any }>;
+  marketsList: Array<MarketData>;
   marketIndex: number;
 }
 
@@ -190,7 +191,7 @@ export const OrderConfirmationModal = ({
 
   // Get notional value in USD
   const getNotionalValue = useCallback(() => {
-    return `${formatNumber(usdValue, true, 2)} USD`;
+    return `${formatNumber(usdValue, 2)} USD`;
   }, [usdValue]);
 
   if (!showConfirmation) return null;

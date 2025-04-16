@@ -17,7 +17,7 @@ export const AmountInput = () => {
   const { activeAccountId } = useActiveAccount();
 
   // Data-related hooks
-  const { maxAmount, subaccountTokenBalances, currentTokenMint, tokenOptions } =
+  const { maxAmount, subaccountTokenBalances, tokenOptions } =
     useDepositWithdrawData();
 
   // Form-related hooks

@@ -1,4 +1,4 @@
-import { OrderType, PositionDirection, BN } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useState, useCallback } from "react";
 import { useActiveAccount } from "@/app/providers/ActiveAccountProvider";
 import { useDriftClient } from "./useDriftClient";
@@ -11,7 +11,6 @@ import {
   placeOrders,
   getTriggerConditionObject,
   placePerpOrder,
-  placeMarketOrder as serviceMarketOrder,
   placeLimitOrder as serviceLimitOrder,
   placeOracleOrder as serviceOracleOrder,
   placeTriggerMarketOrder as serviceTriggerMarketOrder,

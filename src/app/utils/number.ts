@@ -42,11 +42,7 @@ export const formatBN = (
   return decimalPart ? `${formattedWhole}.${decimalPart}` : formattedWhole;
 };
 
-export const formatNumber = (
-  num: number | null,
-  isUSDValue = false,
-  decimals = 2
-): string => {
+export const formatNumber = (num: number | null, decimals = 2): string => {
   if (num === null) return "N/A";
 
   // Format with the specified number of decimal places

@@ -10,7 +10,7 @@ import { useTradingStore } from "../stores/tradingStore";
 
 export const TradingModalController = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orderDirection, setOrderDirection] = useState<any>(
+  const [orderDirection, setOrderDirection] = useState<PositionDirection>(
     PositionDirection.LONG
   );
   const [selectedMarketIndex, setSelectedMarketIndex] = useState(0);

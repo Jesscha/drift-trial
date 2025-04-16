@@ -37,7 +37,7 @@ export function DepositWithdrawModal({
   const { activeAccountId, switchActiveAccount } = useActiveAccount();
 
   // Get data using the new data hook
-  const { subaccountOptions, tokenOptions, subaccountTokenBalances } =
+  const { subaccountOptions, subaccountTokenBalances } =
     useDepositWithdrawData();
 
   // Initialize state when modal opens or props change
@@ -71,8 +71,8 @@ export function DepositWithdrawModal({
 
         {mode === TransactionMode.WITHDRAW && !hasTokenInSubaccounts && (
           <div className="text-xs text-orange-500 bg-orange-900/10 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-2 rounded-lg mb-1">
-            You don't have any {tokenSelectionInfo.symbol} in your subaccounts.
-            Select another token or deposit first.
+            You don&apos;t have any {tokenSelectionInfo.symbol} in your
+            subaccounts. Select another token or deposit first.
           </div>
         )}
 

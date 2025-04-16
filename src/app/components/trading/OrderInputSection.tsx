@@ -1,4 +1,3 @@
-import { BN } from "@drift-labs/sdk";
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
@@ -8,7 +7,6 @@ import {
   shouldShowLimitPrice,
 } from "../modal/TradingModal.util";
 import { useOrderPrice } from "@/app/hooks/trading";
-import { PositionDirection } from "@drift-labs/sdk";
 
 interface OrderInputSectionProps {
   marketIndex: number;
@@ -17,16 +15,12 @@ interface OrderInputSectionProps {
 interface TriggerConditionSelectProps {
   value: TriggerCondition;
   onChange: (value: string | number) => void;
-  orderType: OrderTypeOption;
-  direction: PositionDirection;
 }
 
 // Helper component for trigger condition selection
 const TriggerConditionSelect = ({
   value,
   onChange,
-  orderType,
-  direction,
 }: TriggerConditionSelectProps) => {
   const options = [
     { value: TriggerCondition.ABOVE, label: "Above" },
@@ -62,7 +56,6 @@ export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
   const selectedCustomOrderType = useTradingStore(
     (state) => state.selectedCustomOrderType
   );
-  const selectedDirection = useTradingStore((state) => state.selectedDirection);
   const useScaleOrders = useTradingStore((state) => state.useScaleOrders);
 
   return (
@@ -110,8 +103,6 @@ export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
                 <TriggerConditionSelect
                   value={triggerCondition}
                   onChange={handleTriggerConditionChange}
-                  orderType={selectedCustomOrderType}
-                  direction={selectedDirection}
                 />
               </div>
             </div>

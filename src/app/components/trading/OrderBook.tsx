@@ -1,5 +1,6 @@
+import { OrderBookData, OrderBookEntry } from "@/app/hooks/useOrderBook";
 import React, { useMemo } from "react";
-import { OrderBookData, OrderBookEntry } from "@/app/types";
+import { LoadingSpinnerIcon } from "@/app/assets/icons";
 
 interface OrderBookProps {
   orderBookData?: OrderBookData;
@@ -12,29 +13,22 @@ export const OrderBook: React.FC<OrderBookProps> = ({
   isLoading,
   onPriceClick,
 }) => {
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-neutrals-60 dark:text-neutrals-40">
-        Loading order book...
-      </div>
-    );
-  }
-
-  if (!orderBookData) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-neutrals-60 dark:text-neutrals-40">
-        No order book data available
-      </div>
-    );
-  }
-
   const maxSize = useMemo(() => {
+    if (!orderBookData) return 1;
     const allSizes = [
       ...orderBookData.asks.map((ask) => parseInt(ask.size)),
       ...orderBookData.bids.map((bid) => parseInt(bid.size)),
     ];
     return Math.max(...allSizes, 1);
   }, [orderBookData]);
+
+  if (isLoading || !orderBookData) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-neutrals-20 dark:text-neutrals-40">
+        <LoadingSpinnerIcon size="sm" />
+      </div>
+    );
+  }
 
   const formatPrice = (priceStr: string | number): string => {
     const priceNum =

@@ -1,16 +1,26 @@
 import { useState } from "react";
 import { formatBN } from "../../utils/number";
 import { getTokenIconUrl } from "../../utils/url";
-import { OrderType } from "@drift-labs/sdk";
+import { Order, OrderType } from "@drift-labs/sdk";
 import { usePerpOrder } from "../../hooks/usePerpOrder";
 import { useTransactions } from "../../hooks/useTransactions";
 import { ConfirmCancelModal } from "./ConfirmCancelModal";
 import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
 import { CancelIcon } from "../../assets/icons";
+import Image from "next/image";
+
+interface Market {
+  name?: string;
+  marketIndex: number;
+}
+
+interface MarketMap {
+  [key: number]: Market;
+}
 
 interface OrdersTableProps {
-  orders: any[];
-  markets: any;
+  orders: Order[];
+  markets: MarketMap;
   isLoadingMarkets: boolean;
   viewOnly?: boolean;
 }
@@ -21,7 +31,7 @@ export function OrdersTable({
   isLoadingMarkets,
   viewOnly = false,
 }: OrdersTableProps) {
-  const { cancelOrder, isLoading, error } = usePerpOrder();
+  const { cancelOrder, isLoading } = usePerpOrder();
   const { trackTransaction } = useTransactions();
   const [cancelModalState, setCancelModalState] = useState({
     isOpen: false,
@@ -44,7 +54,7 @@ export function OrdersTable({
     return "UNKNOWN";
   };
 
-  const handleOpenCancelModal = (order: any) => {
+  const handleOpenCancelModal = (order: Order) => {
     const orderTypeDisplay = getOrderTypeDisplay(order.orderType);
     const marketName =
       markets[order.marketIndex]?.name || `Market #${order.marketIndex}`;
@@ -129,6 +139,8 @@ export function OrdersTable({
               (order.orderType && "triggerMarket" in order.orderType) ||
               (order.orderType && "triggerLimit" in order.orderType);
 
+            const marketSymbol = marketData?.name?.split("-")[0] || "unknown";
+
             return (
               <tr
                 key={order.orderId}
@@ -137,17 +149,17 @@ export function OrdersTable({
                 <td className="py-2 px-4">
                   <div className="flex items-center">
                     <div className="w-6 h-6 mr-2 flex-shrink-0 bg-neutrals-5 dark:bg-neutrals-90 rounded-full flex items-center justify-center">
-                      <img
-                        src={getTokenIconUrl(marketData?.name?.split("-")[0])}
+                      <Image
+                        src={getTokenIconUrl(marketSymbol)}
                         alt={marketData?.name || `Market #${order.marketIndex}`}
+                        width={16}
+                        height={16}
                         className="w-4 h-4 object-contain"
                         onError={(e) => {
                           // Fallback to default icon if image fails to load
                           (
                             e.target as HTMLImageElement
-                          ).src = `https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/${marketData?.name
-                            ?.split("-")[0]
-                            .toLowerCase()}.svg`;
+                          ).src = `https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/${marketSymbol.toLowerCase()}.svg`;
                         }}
                       />
                     </div>

@@ -8,7 +8,7 @@ import {
 
 export const SubmitButton = () => {
   const { mode } = useDepositWithdrawStore();
-  const { isValidAmount, amount } = useDepositWithdrawForm();
+  const { isValidAmount } = useDepositWithdrawForm();
   const { handleSubmit, txStatus, isLoading, orderSubmitted } =
     useDepositWithdrawTransaction({
       onClose: () => {}, // This will be handled in the hook

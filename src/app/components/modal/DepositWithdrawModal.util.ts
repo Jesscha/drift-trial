@@ -1,4 +1,4 @@
-import { BN } from "@drift-labs/sdk";
+import { TransactionInfo } from "@/services/txTracker/txTracker";
 
 /**
  * Format a numeric value with dollar sign if needed
@@ -48,7 +48,7 @@ export const calculateAmount = (
 export const getButtonText = (
   isLoading: boolean,
   orderSubmitted: boolean,
-  txStatus: any,
+  txStatus: TransactionInfo | null | undefined,
   mode: string
 ) => {
   if (isLoading || orderSubmitted) {

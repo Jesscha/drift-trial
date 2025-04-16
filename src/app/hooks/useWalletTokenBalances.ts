@@ -1,6 +1,6 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useMemo, useState, useCallback } from "react";
-import { BASE_PRECISION, BN, QUOTE_PRECISION } from "@drift-labs/sdk";
+import { BN, QUOTE_PRECISION } from "@drift-labs/sdk";
 import useSWR from "swr";
 import { PublicKey, AccountInfo, ParsedAccountData } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";

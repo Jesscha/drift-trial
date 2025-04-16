@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PublicKey } from "@solana/web3.js";
 import { usePNLUserData } from "../hooks/usePNLUserData";
 import { AccountsPositionsPanel } from "../components/accounts/Accounts";
 import { TransactionToasts } from "../components/TransactionToasts";
 
-export default function SearchPage() {
+// Component that uses useSearchParams
+function SearchPageContent() {
   const [walletAddress, setWalletAddress] = useState("");
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export default function SearchPage() {
       const pubkey = new PublicKey(address);
       setPublicKey(pubkey);
     } catch (err) {
+      console.error("Error in search page:", err);
       setError("Invalid wallet address");
     }
   };
@@ -119,15 +121,28 @@ export default function SearchPage() {
   );
 }
 
+// Loading fallback component
+function SearchPageLoading() {
+  return (
+    <main className="container mx-auto p-4">
+      <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-6 text-neutrals-100 dark:text-neutrals-10">
+        <p>Loading search page...</p>
+      </div>
+    </main>
+  );
+}
+
+// Main component with Suspense boundary
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<SearchPageLoading />}>
+      <SearchPageContent />
+    </Suspense>
+  );
+}
+
 function WalletSubAccounts({ publicKey }: { publicKey: PublicKey }) {
-  const {
-    subaccounts,
-    totalDepositAmount,
-    totalUnsettledPnl,
-    totalNetValue,
-    isLoading,
-    error,
-  } = usePNLUserData(publicKey);
+  const { subaccounts, isLoading, error } = usePNLUserData(publicKey);
 
   if (isLoading) {
     return (

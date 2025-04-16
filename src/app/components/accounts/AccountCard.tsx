@@ -4,14 +4,16 @@ import { AccountSummary } from "./AccountSummary";
 import { PositionsTable } from "./PositionsTable";
 import { OrdersTable } from "./OrdersTable";
 import { ChevronDownIcon } from "../../assets/icons";
+import { UserAccountWithPNL } from "../../hooks/usePNLUserData";
+import { MarketData } from "../../hooks/usePerpMarketAccounts";
 
 interface AccountCardProps {
-  account: any;
-  markets: any;
+  account: UserAccountWithPNL;
+  markets: Record<number, MarketData>;
   isLoadingMarkets: boolean;
   processingTx: number | null;
-  onDeposit?: (account: any) => void;
-  onWithdraw?: (account: any) => void;
+  onDeposit?: (account: UserAccountWithPNL) => void;
+  onWithdraw?: (account: UserAccountWithPNL) => void;
   viewOnly?: boolean;
 }
 
@@ -26,7 +28,7 @@ export function AccountCard({
 }: AccountCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const activeOrders = account.orders.filter(
-    (order: any) => order.status && "open" in order.status
+    (order) => order.status && "open" in order.status
   );
   const accountName = String.fromCharCode(...account.name).trim();
 

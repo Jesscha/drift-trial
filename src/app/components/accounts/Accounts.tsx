@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePNLUserData } from "../../hooks/usePNLUserData";
+import { usePNLUserData, UserAccountWithPNL } from "../../hooks/usePNLUserData";
 import { usePerpMarketAccounts } from "../../hooks/usePerpMarketAccounts";
 import { DepositWithdrawModal } from "../modal/DepositWithdrawModal";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -44,7 +44,7 @@ export function AccountsPositionsPanel({
   const [processingTx, setProcessingTx] = useState<number | null>(null);
 
   // Modal control functions
-  const openDeposit = (subaccount: any) => {
+  const openDeposit = (subaccount: UserAccountWithPNL) => {
     switchActiveAccount(subaccount.subAccountId);
     setModalState({
       isOpen: true,
@@ -53,7 +53,7 @@ export function AccountsPositionsPanel({
     });
   };
 
-  const openWithdraw = (subaccount: any) => {
+  const openWithdraw = (subaccount: UserAccountWithPNL) => {
     switchActiveAccount(subaccount.subAccountId);
     setModalState({
       isOpen: true,

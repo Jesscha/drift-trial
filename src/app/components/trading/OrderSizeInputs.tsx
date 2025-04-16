@@ -3,6 +3,7 @@ import { formatMarketName } from "../modal/TradingModal.util";
 import { PercentageSlider } from "../PercentageSlider";
 import { useOrderSize } from "@/app/hooks/trading";
 import { useTradingStore } from "@/app/stores/tradingStore";
+import { useEffect } from "react";
 
 interface OrderSizeInputsProps {
   marketName: string;
@@ -29,6 +30,10 @@ export const OrderSizeInputs = ({
   const price = useTradingStore((state) => state.price);
   const isDisabled = price === 0;
 
+  useEffect(() => {
+    handleSetSizePercentage(50);
+  }, [handleSetSizePercentage]);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
@@ -39,8 +44,7 @@ export const OrderSizeInputs = ({
           className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-80 rounded-full border border-neutrals-30/30 text-neutrals-60 dark:text-neutrals-40 cursor-pointer"
           onClick={handleSetMaxSize}
         >
-          Max: {maxPositionSize ? formatNumber(maxPositionSize, true) : "0.00"}{" "}
-          USD
+          Max: {maxPositionSize ? formatNumber(maxPositionSize, 2) : "0.00"} USD
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">

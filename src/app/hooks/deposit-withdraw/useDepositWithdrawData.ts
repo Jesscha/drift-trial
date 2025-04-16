@@ -136,6 +136,7 @@ export const useDepositWithdrawData = () => {
 
           return Math.min(userTokenBalance, withdrawalLimitNumber);
         } catch (err) {
+          console.error("Error fetching deposit withdrawal data:", err);
           return subaccountTokenInfo?.tokenBalance || 0;
         }
       }

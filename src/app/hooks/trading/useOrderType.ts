@@ -21,7 +21,7 @@ export const useOrderType = () => {
       setSelectedCustomOrderType(tab);
       setOrderType(tab);
     },
-    [setActiveTab, setSelectedCustomOrderType]
+    [setActiveTab, setSelectedCustomOrderType, setOrderType]
   );
 
   const handleProOrderSelect = useCallback(
@@ -31,7 +31,7 @@ export const useOrderType = () => {
       setSelectedCustomOrderType(orderType);
       setOrderType(orderType);
     },
-    [setActiveTab, setSelectedCustomOrderType]
+    [setActiveTab, setSelectedCustomOrderType, setOrderType]
   );
   const orderTabs = [OrderTypeOption.MARKET, OrderTypeOption.LIMIT];
 

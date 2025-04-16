@@ -204,6 +204,7 @@ export const useOrderExecution = (
       // Close confirmation modal
       setShowConfirmation(false);
     } catch (error) {
+      console.error("Error executing order:", error);
       setOrderSubmitted(false);
       // Close confirmation modal
       setShowConfirmation(false);

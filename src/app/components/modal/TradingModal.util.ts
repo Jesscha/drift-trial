@@ -1,4 +1,4 @@
-import { OrderType, BN, PositionDirection } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { DropdownOption } from "../CustomDropdown";
 

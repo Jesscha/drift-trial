@@ -1,4 +1,4 @@
-import { OrderType, PositionDirection } from "@drift-labs/sdk";
+import { PositionDirection } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
 import { useOrderFeatures } from "@/app/hooks/trading";

@@ -45,6 +45,7 @@ export const useOrderSize = (marketIndex: number) => {
 
       return totalSize || 0;
     } catch (error) {
+      console.error("Error in useOrderSize:", error);
       return 0;
     }
   }, [

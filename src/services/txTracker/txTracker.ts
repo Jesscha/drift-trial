@@ -1,4 +1,4 @@
-import { Connection, TransactionSignature } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import { EventEmitter } from "events";
 
 export enum TransactionSuccessActionType {
@@ -10,14 +10,10 @@ export enum TransactionSuccessActionType {
 
 export type TransactionSuccessAction = {
   type: TransactionSuccessActionType;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 };
 
-export type TransactionStatus =
-  | "pending"
-  | "processing"
-  | "confirmed"
-  | "failed";
+export type TransactionStatus = "processing" | "confirmed" | "failed";
 
 export type TransactionInfo = {
   signature: string;
@@ -235,9 +231,10 @@ class TxTrackerService extends EventEmitter {
   async clearAllTransactions() {
     return this.updateWithLock(() => {
       // Clean up all listeners
-      this.txListeners.forEach((id, sig) => {
+      this.txListeners.forEach((id, signature) => {
         if (this.connection) {
           this.connection.removeSignatureListener(id);
+          console.log("Removed listener for transaction:", signature);
         }
       });
       this.txListeners.clear();

@@ -1,10 +1,11 @@
 import { formatBN } from "../../utils/number";
 import { ChartIcon } from "../../assets/icons";
+import { BN } from "@drift-labs/sdk";
 
 interface PortfolioSummaryProps {
-  totalDepositAmount: any;
-  totalUnsettledPnl: any;
-  totalNetValue: any;
+  totalDepositAmount: BN;
+  totalUnsettledPnl: BN;
+  totalNetValue: BN;
 }
 
 export function PortfolioSummary({

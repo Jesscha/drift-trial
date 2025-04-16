@@ -12,6 +12,7 @@ import {
   getActiveAccountId,
 } from "@/services/drift/account";
 import { PositionDirection, BN, User } from "@drift-labs/sdk";
+import { PublicKey } from "@solana/web3.js";
 import useSWR from "swr";
 
 export interface ActiveAccountContextType {
@@ -22,12 +23,15 @@ export interface ActiveAccountContextType {
   getMaxTradeSizeUSDCForPerp: (
     marketIndex: number,
     positionDirection: PositionDirection
-  ) => any;
-  getWithdrawalLimit: (marketIndex: number, reduceOnly: boolean) => any;
+  ) => BN | undefined;
+  getWithdrawalLimit: (
+    marketIndex: number,
+    reduceOnly: boolean
+  ) => BN | undefined;
   getFreeCollateral: () => BN;
-  getUserAccountPublicKey: () => any;
+  getUserAccountPublicKey: () => PublicKey | undefined;
   activeAccountId: number;
-  mutate: () => Promise<any>;
+  mutate: () => Promise<User | undefined>;
 }
 
 export const ActiveAccountContext = createContext<

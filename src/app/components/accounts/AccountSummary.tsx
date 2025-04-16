@@ -1,9 +1,10 @@
 import { formatBN } from "../../utils/number";
+import { BN } from "@drift-labs/sdk";
 
 interface AccountSummaryProps {
-  depositAmount: any;
-  netUnsettledPnl: any;
-  netTotal: any;
+  depositAmount: BN;
+  netUnsettledPnl: BN;
+  netTotal: BN;
 }
 
 export function AccountSummary({
