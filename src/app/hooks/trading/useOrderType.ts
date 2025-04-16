@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import { OrderTypeOption } from "@/app/components/modal/TradingModal.util";
+import {
+  getSDKOrderType,
+  OrderTypeOption,
+} from "@/app/components/modal/TradingModal.util";
 
 export const useOrderType = () => {
   const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
@@ -19,7 +22,7 @@ export const useOrderType = () => {
     (tab: OrderTypeOption) => {
       setActiveTab(tab);
       setSelectedCustomOrderType(tab);
-      setOrderType(tab);
+      setOrderType(getSDKOrderType(tab));
     },
     [setActiveTab, setSelectedCustomOrderType, setOrderType]
   );

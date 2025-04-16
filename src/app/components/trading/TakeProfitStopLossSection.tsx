@@ -2,7 +2,6 @@ import { OrderType, PositionDirection, QUOTE_PRECISION } from "@drift-labs/sdk";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   isTriggerOrderType,
-  mapSDKToUIOrderType,
   calculateTPSLPrices,
 } from "../modal/TradingModal.util";
 import { useEffect } from "react";
@@ -55,8 +54,9 @@ export const TakeProfitStopLossSection = ({
   const setStopLossLimitPrice = useTradingStore(
     (state) => state.setStopLossLimitPrice
   );
-
-  const orderType = useTradingStore((state) => state.selectedOrderType);
+  const customOrderType = useTradingStore(
+    (state) => state.selectedCustomOrderType
+  );
 
   // Get oracle price as backup
   const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
@@ -103,7 +103,7 @@ export const TakeProfitStopLossSection = ({
     setStopLossLimitPrice,
   ]);
 
-  if (isTriggerOrderType(mapSDKToUIOrderType(orderType))) {
+  if (isTriggerOrderType(customOrderType)) {
     return null;
   }
 
