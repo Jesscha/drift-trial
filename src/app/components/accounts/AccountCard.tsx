@@ -148,17 +148,6 @@ export function AccountCard({
               />
             </div>
           </div>
-
-          {/* Action button - only show if not in view-only mode */}
-          {!viewOnly &&
-            !account.perpPositions.length &&
-            !activeOrders.length && (
-              <div className="mt-6 flex justify-center">
-                <button className="px-4 py-2 bg-purple-50 hover:bg-purple-60 text-white rounded-md transition-colors font-medium">
-                  Open a Position
-                </button>
-              </div>
-            )}
         </div>
       )}
     </div>

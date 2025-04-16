@@ -103,7 +103,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       {label && (
         <div className="text-xs text-neutrals-80 dark:text-neutrals-30 mb-1.5">
           {label}
@@ -130,7 +130,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
               </span>
             )}
           </div>
-          <div className="relative h-4 w-4">
+          <div className="h-4 w-4">
             <ChevronDownSmallIcon
               size="sm"
               className={`text-neutrals-60 transition-transform ${
@@ -143,7 +143,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         {/* Dropdown options */}
         {isOpen && (
           <div
-            className={`absolute z-10 w-full mt-1 bg-neutrals-10 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70 shadow-lg max-h-48 overflow-y-auto ${dropdownClassName}`}
+            className={`absolute z-20 w-full mt-1 bg-neutrals-10 dark:bg-neutrals-80 rounded-lg border border-neutrals-20 dark:border-neutrals-70 shadow-lg max-h-48 overflow-y-auto ${dropdownClassName}`}
           >
             {options.map((option) => (
               <div

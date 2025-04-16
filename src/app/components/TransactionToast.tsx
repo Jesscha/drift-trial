@@ -34,10 +34,10 @@ export function TransactionToast({
 
         // After animation completes, remove from DOM
         setTimeout(() => {
-          setIsVisible(false);
           onClose();
-        }, 300); // Animation duration
-      }, 2000); // Auto-disappear after 1 second
+          setIsVisible(false);
+        }, 200); // Animation duration
+      }, 5000); // Auto-disappear after 5 seconds
     }
 
     return () => {
@@ -49,22 +49,26 @@ export function TransactionToast({
   if (!isVisible) return null;
 
   // Determine status color and label
-  let statusBg = "bg-yellow-50 dark:bg-yellow-90";
-  let statusText = "Processing...";
-  let statusTextColor = "text-yellow-80 dark:text-yellow-30";
+  let statusText = "Pending";
+  let statusTextColor = "text-lightBlue-70 dark:text-lightBlue-30";
+  let borderColor = "border-lightBlue-40";
+  let statusDotColor = "bg-lightBlue-50";
 
-  if (status === "confirmed") {
-    statusBg = "bg-green-20 dark:bg-green-90";
+  if (status === "processing") {
+    statusText = "Processing...";
+    statusTextColor = "text-yellow-80 dark:text-yellow-30";
+    borderColor = "border-yellow-50";
+    statusDotColor = "bg-yellow-50";
+  } else if (status === "confirmed") {
     statusText = "Confirmed";
     statusTextColor = "text-green-70 dark:text-green-30";
+    borderColor = "border-green-60";
+    statusDotColor = "bg-green-60";
   } else if (status === "failed") {
-    statusBg = "bg-red-20 dark:bg-red-90";
     statusText = "Failed";
     statusTextColor = "text-red-70 dark:text-red-30";
-  } else if (status === "pending") {
-    statusBg = "bg-lightBlue-20 dark:bg-lightBlue-90";
-    statusText = "Pending";
-    statusTextColor = "text-lightBlue-70 dark:text-lightBlue-30";
+    borderColor = "border-red-60";
+    statusDotColor = "bg-red-60";
   }
 
   // Format timestamp
@@ -81,39 +85,43 @@ export function TransactionToast({
   const handleClose = () => {
     setIsExiting(true);
     setTimeout(() => {
-      setIsVisible(false);
       onClose();
-    }, 300); // Animation duration
+      setIsVisible(false);
+    }, 200); // Animation duration
   };
 
   return (
     <div
-      className={`${statusBg} ${statusTextColor} p-3 rounded-md shadow-md mb-3 max-w-sm
+      className={`bg-neutrals-0 dark:bg-neutrals-80 p-4 rounded-lg shadow-md mb-3 max-w-sm border-l-4 ${borderColor}
         ${isExiting ? "animate-toast-out" : "animate-toast-in"}`}
     >
       <div className="flex justify-between items-start">
-        <div>
-          <div className="font-bold mb-1">{description}</div>
-          <div className="text-sm mb-1 text-neutrals-90 dark:text-neutrals-20">
-            Status: {statusText}
+        <div className="flex-1">
+          <div className="font-medium text-base mb-2 text-neutrals-100 dark:text-neutrals-0">
+            {description}
           </div>
-          <div className="text-xs mb-1 text-neutrals-80 dark:text-neutrals-30">
-            Signature:{" "}
-            <span className="font-mono">{truncateSignature(signature)}</span>
+          <div className="flex items-center text-sm mb-2">
+            <div
+              className={`w-2 h-2 rounded-full mr-2 ${statusDotColor}`}
+            ></div>
+            <span className={`${statusTextColor}`}>Status: {statusText}</span>
+          </div>
+          <div className="text-xs mb-1 text-neutrals-80 dark:text-neutrals-30 font-mono">
+            {truncateSignature(signature)}
           </div>
           <div className="text-xs opacity-70 text-neutrals-70 dark:text-neutrals-40">
             {formatTime(timestamp)}
           </div>
           {error && (
-            <div className="text-xs mt-2 bg-red-20 dark:bg-red-90 text-red-70 dark:text-red-30 p-1 rounded overflow-hidden overflow-ellipsis">
+            <div className="text-xs mt-2 bg-red-10 dark:bg-neutrals-90 text-red-70 dark:text-red-30 p-2 rounded border border-red-60">
               {error}
             </div>
           )}
         </div>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 ml-2">
           <button
             onClick={handleClose}
-            className="text-neutrals-70 dark:text-neutrals-40 hover:text-neutrals-100 dark:hover:text-neutrals-0 text-xs font-bold transition-colors"
+            className="text-neutrals-60 hover:text-neutrals-100 dark:text-neutrals-40 dark:hover:text-neutrals-0 text-xs font-bold transition-colors"
           >
             ✕
           </button>
@@ -122,7 +130,7 @@ export function TransactionToast({
               href={`https://explorer.solana.com/tx/${signature}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-purple-50 hover:text-purple-60 underline transition-colors"
+              className="text-xs text-purple-50 hover:text-purple-60 underline transition-colors font-medium"
             >
               View
             </a>

@@ -11,6 +11,7 @@ import {
   InfoIcon,
   LoadingSpinnerIcon,
 } from "../../assets/icons";
+import { useActiveAccount } from "@/app/providers/ActiveAccountProvider";
 
 interface AccountsPositionsPanelProps {
   publicKeyOverride?: PublicKey;
@@ -21,6 +22,7 @@ export function AccountsPositionsPanel({
 }: AccountsPositionsPanelProps) {
   const { publicKey: walletPublicKey } = useWallet();
   const publicKey = publicKeyOverride || walletPublicKey;
+  const { switchActiveAccount } = useActiveAccount();
 
   const {
     subaccounts,
@@ -43,6 +45,7 @@ export function AccountsPositionsPanel({
 
   // Modal control functions
   const openDeposit = (subaccount: any) => {
+    switchActiveAccount(subaccount.subAccountId);
     setModalState({
       isOpen: true,
       mode: "deposit",
@@ -51,6 +54,7 @@ export function AccountsPositionsPanel({
   };
 
   const openWithdraw = (subaccount: any) => {
+    switchActiveAccount(subaccount.subAccountId);
     setModalState({
       isOpen: true,
       mode: "withdraw",
