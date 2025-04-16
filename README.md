@@ -38,7 +38,7 @@ A Next.js-based dashboard for interacting with the Drift Protocol on Solana bloc
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/drift-frontend-task.git
+git clone https://github.com/Jesscha/drift-trial.git
 cd drift-frontend-task
 ```
 
