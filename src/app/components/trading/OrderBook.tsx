@@ -24,7 +24,7 @@ export const OrderBook: React.FC<OrderBookProps> = ({
 
   if (isLoading || !orderBookData) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-neutrals-20 dark:text-neutrals-40">
+      <div className="w-[300px] h-full flex items-center justify-center text-neutrals-20 dark:text-neutrals-40">
         <LoadingSpinnerIcon size="sm" />
       </div>
     );
