@@ -31,8 +31,10 @@ export const OrderSizeInputs = ({
   const isDisabled = price === 0;
 
   useEffect(() => {
-    handleSetSizePercentage(50);
-  }, [handleSetSizePercentage]);
+    if (usdValue === 0 && price !== 0) {
+      handleSetSizePercentage(50);
+    }
+  }, [usdValue, price]);
 
   return (
     <div>
