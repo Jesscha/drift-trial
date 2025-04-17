@@ -100,11 +100,21 @@ export function TransactionToast({
           <div className="font-medium text-base mb-2 text-neutrals-100 dark:text-neutrals-0">
             {description}
           </div>
-          <div className="flex items-center text-sm mb-2">
+          <div className="flex items-center text-sm mb-2 space-x-2">
             <div
               className={`w-2 h-2 rounded-full mr-2 ${statusDotColor}`}
             ></div>
             <span className={`${statusTextColor}`}>Status: {statusText}</span>
+            {status === "confirmed" && (
+              <a
+                href={`https://explorer.solana.com/tx/${signature}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-purple-50 hover:text-purple-60 underline transition-colors font-medium"
+              >
+                View
+              </a>
+            )}
           </div>
           <div className="text-xs mb-1 text-neutrals-80 dark:text-neutrals-30 font-mono">
             {truncateSignature(signature)}
@@ -125,16 +135,6 @@ export function TransactionToast({
           >
             ✕
           </button>
-          {status === "confirmed" && (
-            <a
-              href={`https://explorer.solana.com/tx/${signature}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-purple-50 hover:text-purple-60 underline transition-colors font-medium"
-            >
-              View
-            </a>
-          )}
         </div>
       </div>
     </div>
