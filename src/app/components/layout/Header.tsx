@@ -105,13 +105,13 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Search wallet..."
-                className="w-48 bg-neutrals-20 dark:bg-neutrals-70 text-neutrals-100 dark:text-neutrals-10 px-3 py-2 rounded-l border border-neutrals-30 dark:border-neutrals-60 focus:outline-none focus:ring-2 focus:ring-purple-50"
+                className="w-48 bg-neutrals-5 dark:bg-neutrals-90 text-neutrals-100 dark:text-neutrals-10 px-3 py-2 rounded-md border border-neutrals-20 dark:border-neutrals-70 focus:outline-none focus:ring-1 focus:ring-blue-100"
                 value={searchWallet}
                 onChange={(e) => setSearchWallet(e.target.value)}
               />
               <button
                 type="submit"
-                className="bg-purple-50 text-white px-3 py-2 rounded-r hover:bg-purple-60 transition-colors"
+                className="ml-2 bg-blue-100 hover:bg-blue-200 text-neutrals-100 px-3 py-2 rounded-md transition-colors font-medium"
               >
                 Search
               </button>
@@ -167,13 +167,13 @@ export default function Header() {
             <input
               type="text"
               placeholder="Search wallet address..."
-              className="flex-grow bg-neutrals-20 dark:bg-neutrals-70 text-neutrals-100 dark:text-neutrals-10 px-3 py-2 rounded-l border border-neutrals-30 dark:border-neutrals-60 focus:outline-none focus:ring-2 focus:ring-purple-50"
+              className="flex-grow bg-neutrals-5 dark:bg-neutrals-90 text-neutrals-100 dark:text-neutrals-10 px-3 py-2 rounded-md border border-neutrals-20 dark:border-neutrals-70 focus:outline-none focus:ring-1 focus:ring-blue-100"
               value={searchWallet}
               onChange={(e) => setSearchWallet(e.target.value)}
             />
             <button
               type="submit"
-              className="bg-purple-50 text-white px-3 py-2 rounded-r hover:bg-purple-60 transition-colors"
+              className="ml-2 bg-blue-100 hover:bg-blue-200 text-neutrals-100 px-3 py-2 rounded-md transition-colors font-medium"
             >
               Search
             </button>

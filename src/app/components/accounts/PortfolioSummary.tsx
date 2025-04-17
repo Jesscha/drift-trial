@@ -16,10 +16,7 @@ export function PortfolioSummary({
   return (
     <div>
       <div className="flex items-center mb-4">
-        <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-          <ChartIcon size="sm" className="text-purple-50" />
-        </div>
-        <h2 className="text-lg font-medium">Portfolio Summary</h2>
+        <h2 className="text-lg font-medium">Account Summary</h2>
       </div>
       <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-lg p-5">
         <div className="grid grid-cols-3 gap-8">

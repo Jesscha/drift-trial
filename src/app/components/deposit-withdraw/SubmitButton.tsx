@@ -22,7 +22,7 @@ export const SubmitButton = () => {
       onClick={(e) => handleSubmit(e)}
       className={`w-full py-3 text-sm font-semibold text-white rounded-lg transition-colors ${
         isDisabled
-          ? "bg-neutrals-60 cursor-not-allowed"
+          ? "bg-neutrals-20 cursor-not-allowed"
           : "bg-purple-50 hover:bg-purple-60"
       }`}
       disabled={isDisabled}
