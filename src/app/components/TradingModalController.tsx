@@ -133,7 +133,8 @@ export const TradingModalController = () => {
           onClick={handleOpenModal}
           className="w-full bg-purple-50 hover:bg-purple-60 text-white py-2 px-4 rounded-md transition-colors"
         >
-          Open Trading Modal
+          {orderDirection === PositionDirection.LONG ? "Long" : "Short"}{" "}
+          {marketsList[selectedMarketIndex]?.name || "Market"}
         </button>
       </div>
 
