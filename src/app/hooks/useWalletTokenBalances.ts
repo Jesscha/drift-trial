@@ -1,5 +1,5 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import { BN, QUOTE_PRECISION } from "@drift-labs/sdk";
 import useSWR from "swr";
 import { PublicKey, AccountInfo, ParsedAccountData } from "@solana/web3.js";
@@ -42,13 +42,11 @@ export function useWalletTokenBalances() {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const { marketsList, isLoading: isLoadingMarkets } = useSpotMarketAccounts();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch token accounts for the connected wallet
   const {
     data: tokenBalances,
     error,
-    isLoading,
     mutate,
   } = useSWR<TokenBalancesData | null>(
     publicKey ? `token-balances-${publicKey.toString()}` : null,
@@ -83,9 +81,7 @@ export function useWalletTokenBalances() {
   );
 
   // Fetch oracle prices for all markets
-  const { data: oraclePrices, isLoading: isLoadingPrices } = useSWR<
-    Record<number, BN | null>
-  >(
+  const { data: oraclePrices } = useSWR<Record<number, BN | null>>(
     marketsList.length > 0 ? "wallet-oracle-prices" : null,
     async () => {
       const prices: Record<number, BN | null> = {};
@@ -248,16 +244,6 @@ export function useWalletTokenBalances() {
     });
   }, [processedBalances]);
 
-  // Manual refresh function
-  const refreshBalances = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      await mutate();
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [mutate]);
-
   return {
     walletTokenBalances: sortedTokenBalances,
     walletTokensForDeposit: [],
@@ -265,6 +251,6 @@ export function useWalletTokenBalances() {
     error,
     isConnected: !!publicKey,
     solBalance: tokenBalances?.solBalance,
-    refetch: refreshBalances,
+    refetch: mutate,
   };
 }
