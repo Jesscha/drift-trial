@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { getTokenIconUrl } from "@/app/utils/url";
+import { getTokenIconUrl } from "@/utils/assets";
 import { DropdownOption } from "../CustomDropdown";
 import { TransactionMode } from "@/app/stores/depositWithdrawStore";
 import { ChevronDownSmallIcon, CheckIcon } from "../../assets/icons";

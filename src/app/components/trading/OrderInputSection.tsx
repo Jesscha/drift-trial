@@ -1,10 +1,10 @@
 import { useTradingStore } from "@/app/stores/tradingStore";
 import {
   isTriggerOrderType,
-  OrderTypeOption,
   shouldShowLimitPrice,
 } from "../modal/TradingModal.util";
 import { useOrderPrice } from "@/app/hooks/trading";
+import { OrderType } from "@drift-labs/sdk";
 
 interface OrderInputSectionProps {
   marketIndex: number;
@@ -18,14 +18,12 @@ export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
   const triggerPrice = useTradingStore((state) => state.triggerPrice);
   const setTriggerPrice = useTradingStore((state) => state.setTriggerPrice);
 
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
+  const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
   const useScaleOrders = useTradingStore((state) => state.useScaleOrders);
 
   return (
     <>
-      {isTriggerOrderType(selectedCustomOrderType) && (
+      {isTriggerOrderType(selectedOrderType) && (
         <div className="flex flex-col ">
           <div className="text-sm text-neutrals-80 dark:text-neutrals-30 mb-1">
             Trigger Price
@@ -70,10 +68,10 @@ export const OrderInputSection = ({ marketIndex }: OrderInputSectionProps) => {
       )}
 
       {/* Limit Price section - Only show for limit-based orders */}
-      {shouldShowLimitPrice(selectedCustomOrderType) && (
+      {shouldShowLimitPrice(selectedOrderType) && (
         <div>
           <div className="text-sm text-neutrals-80 dark:text-neutrals-30 mb-1">
-            {selectedCustomOrderType === OrderTypeOption.LIMIT && useScaleOrders
+            {selectedOrderType === OrderType.LIMIT && useScaleOrders
               ? "Starting Price"
               : "Limit Price"}
           </div>

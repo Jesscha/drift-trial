@@ -1,5 +1,5 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import { BN, QUOTE_PRECISION } from "@drift-labs/sdk";
 import useSWR from "swr";
 import { PublicKey, AccountInfo, ParsedAccountData } from "@solana/web3.js";
@@ -7,6 +7,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useSpotMarketAccounts } from "./useSpotMarketAccounts";
 import { getSpotOraclePrice } from "@/services/drift/market";
 import driftService from "@/services/drift/client";
+import { getTokenIconUrl } from "@/utils/assets";
 
 // Type definitions
 export interface TokenBalanceInfo {
@@ -41,13 +42,11 @@ export function useWalletTokenBalances() {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const { marketsList, isLoading: isLoadingMarkets } = useSpotMarketAccounts();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch token accounts for the connected wallet
   const {
     data: tokenBalances,
     error,
-    isLoading,
     mutate,
   } = useSWR<TokenBalancesData | null>(
     publicKey ? `token-balances-${publicKey.toString()}` : null,
@@ -81,31 +80,8 @@ export function useWalletTokenBalances() {
     }
   );
 
-  // Function to get the token icon URL
-  const getTokenIconUrl = useCallback((tokenSymbol: string | undefined) => {
-    if (!tokenSymbol) {
-      return "https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/unknown.svg";
-    }
-
-    const symbol = tokenSymbol.toLowerCase().trim();
-
-    // Special case for BONK token
-    if (symbol === "bonk") {
-      return "https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/bonk.webp";
-    }
-
-    // Special case for SOL
-    if (symbol === "sol") {
-      return "https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/sol.svg";
-    }
-
-    return `https://drift-public.s3.eu-central-1.amazonaws.com/assets/icons/markets/${symbol}.svg`;
-  }, []);
-
   // Fetch oracle prices for all markets
-  const { data: oraclePrices, isLoading: isLoadingPrices } = useSWR<
-    Record<number, BN | null>
-  >(
+  const { data: oraclePrices } = useSWR<Record<number, BN | null>>(
     marketsList.length > 0 ? "wallet-oracle-prices" : null,
     async () => {
       const prices: Record<number, BN | null> = {};
@@ -255,13 +231,7 @@ export function useWalletTokenBalances() {
     }
 
     return balances;
-  }, [
-    tokenBalances,
-    marketsList,
-    isLoadingMarkets,
-    getTokenIconUrl,
-    oraclePrices,
-  ]);
+  }, [tokenBalances, marketsList, isLoadingMarkets, oraclePrices]);
 
   // Sort token balances by dollar value
   const sortedTokenBalances = useMemo(() => {
@@ -274,21 +244,13 @@ export function useWalletTokenBalances() {
     });
   }, [processedBalances]);
 
-  // Manual refresh function
-  const refreshBalances = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      await mutate();
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [mutate]);
-
   return {
-    tokenBalances: sortedTokenBalances,
-    isLoading: isLoading || isLoadingMarkets || isLoadingPrices,
-    isRefreshing,
+    walletTokenBalances: sortedTokenBalances,
+    walletTokensForDeposit: [],
+    isParsing: false,
     error,
-    refreshBalances,
+    isConnected: !!publicKey,
+    solBalance: tokenBalances?.solBalance,
+    refetch: mutate,
   };
 }

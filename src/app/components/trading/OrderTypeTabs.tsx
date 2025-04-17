@@ -1,7 +1,16 @@
 import { CustomDropdown } from "../CustomDropdown";
 import { useOrderType } from "@/app/hooks/trading";
 import { isTriggerOrderType } from "../modal/TradingModal.util";
+import { TradingModalTab } from "@/types";
 
+const TAB_NAME_MAP = {
+  market: "Market",
+  limit: "Limit",
+  "stop-loss-market": "Stop Loss Market",
+  "stop-loss-limit": "Stop Loss Limit",
+  "take-profit-market": "Take Profit Market",
+  "take-profit-limit": "Take Profit Limit",
+};
 export const OrderTypeTabs = () => {
   const {
     activeTab,
@@ -23,7 +32,7 @@ export const OrderTypeTabs = () => {
               : "text-neutrals-60 dark:text-neutrals-40 hover:text-neutrals-100 dark:hover:text-neutrals-0"
           }`}
         >
-          {tab}
+          {TAB_NAME_MAP[tab]}
           {activeTab === tab && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50"></div>
           )}
@@ -38,10 +47,12 @@ export const OrderTypeTabs = () => {
               ? activeTab
               : "Pro Orders"
           }
-          onChange={handleProOrderSelect}
+          onChange={(value) => handleProOrderSelect(value as TradingModalTab)}
           placeholder="Pro Orders"
           renderOption={(option) => (
-            <span className="font-medium text-sm">{option.label}</span>
+            <span className="font-medium text-sm">
+              {TAB_NAME_MAP[option.value as TradingModalTab]}
+            </span>
           )}
           className={`py-1 px-2 border-none bg-transparent ${
             isTriggerOrderType(activeTab) ? "text-purple-50" : ""

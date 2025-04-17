@@ -1,6 +1,7 @@
 import { OrderBookData, OrderBookEntry } from "@/app/hooks/useOrderBook";
 import React, { useMemo } from "react";
 import { LoadingSpinnerIcon } from "@/app/assets/icons";
+import { formatNumber } from "@/utils/formatting";
 
 interface OrderBookProps {
   orderBookData?: OrderBookData;
@@ -35,12 +36,12 @@ export const OrderBook: React.FC<OrderBookProps> = ({
       typeof priceStr === "string"
         ? parseInt(priceStr) / 1000000
         : priceStr / 1000000;
-    return priceNum.toFixed(4);
+    return formatNumber(priceNum, 4);
   };
 
   const formatSize = (sizeStr: string): string => {
     const sizeNum = parseInt(sizeStr) / 1000000000;
-    return sizeNum.toFixed(2);
+    return formatNumber(sizeNum, 2);
   };
 
   const getSizePercentage = (sizeStr: string): number => {

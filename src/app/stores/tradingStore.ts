@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
-import { OrderTypeOption } from "../components/modal/TradingModal.util";
+import { TriggerCondition, TradingModalTab } from "@/types/orders";
 
 interface TradingState {
   // Order size and price state
@@ -12,7 +11,6 @@ interface TradingState {
 
   // Order type state
   selectedOrderType: OrderType;
-  selectedCustomOrderType: OrderTypeOption;
   selectedDirection: PositionDirection;
 
   // Trigger order state
@@ -41,9 +39,7 @@ interface TradingState {
   orderSubmitted: boolean;
   orderTxid: string | null;
   showConfirmation: boolean;
-
-  // UI state
-  activeTab: OrderTypeOption;
+  activeTab: TradingModalTab;
 
   // Actions
   setSize: (size: number) => void;
@@ -52,11 +48,12 @@ interface TradingState {
   setSizePercentage: (percentage: number) => void;
 
   setSelectedOrderType: (orderType: OrderType) => void;
-  setSelectedCustomOrderType: (orderType: OrderTypeOption) => void;
   setSelectedDirection: (direction: PositionDirection) => void;
 
   setTriggerPrice: (price: number | null) => void;
   setTriggerCondition: (condition: number) => void;
+
+  setActiveTab: (tab: TradingModalTab) => void;
 
   setUseScaleOrders: (use: boolean) => void;
   setNumScaleOrders: (num: number) => void;
@@ -80,8 +77,6 @@ interface TradingState {
   setOrderTxid: (txid: string | null) => void;
   setShowConfirmation: (show: boolean) => void;
 
-  setActiveTab: (tab: OrderTypeOption) => void;
-
   // Reset state
   resetState: () => void;
 }
@@ -94,7 +89,6 @@ export const useTradingStore = create<TradingState>((set) => ({
   sizePercentage: 50,
 
   selectedOrderType: OrderType.LIMIT,
-  selectedCustomOrderType: OrderTypeOption.LIMIT,
   selectedDirection: PositionDirection.LONG,
 
   triggerPrice: null,
@@ -120,7 +114,7 @@ export const useTradingStore = create<TradingState>((set) => ({
   orderTxid: null,
   showConfirmation: false,
 
-  activeTab: OrderTypeOption.LIMIT,
+  activeTab: "limit",
 
   // Simple setter actions
   setSize: (size) => set({ size }),
@@ -129,8 +123,6 @@ export const useTradingStore = create<TradingState>((set) => ({
   setSizePercentage: (percentage) => set({ sizePercentage: percentage }),
 
   setSelectedOrderType: (orderType) => set({ selectedOrderType: orderType }),
-  setSelectedCustomOrderType: (orderType) =>
-    set({ selectedCustomOrderType: orderType }),
   setSelectedDirection: (direction) => set({ selectedDirection: direction }),
 
   setTriggerPrice: (price) => set({ triggerPrice: price }),
@@ -142,6 +134,8 @@ export const useTradingStore = create<TradingState>((set) => ({
   setMaxPrice: (price) => set({ maxPrice: price }),
   setScaleDistribution: (distribution) =>
     set({ scaleDistribution: distribution }),
+
+  setActiveTab: (tab) => set({ activeTab: tab }),
 
   setEnableTakeProfit: (enable) => set({ enableTakeProfit: enable }),
   setTakeProfitPrice: (price) => set({ takeProfitPrice: price }),
@@ -158,8 +152,6 @@ export const useTradingStore = create<TradingState>((set) => ({
   setOrderTxid: (txid) => set({ orderTxid: txid }),
   setShowConfirmation: (show) => set({ showConfirmation: show }),
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
-
   // Reset state
   resetState: () =>
     set({
@@ -168,7 +160,6 @@ export const useTradingStore = create<TradingState>((set) => ({
       usdValue: 0,
       sizePercentage: 50,
       selectedOrderType: OrderType.LIMIT,
-      selectedCustomOrderType: OrderTypeOption.LIMIT,
       selectedDirection: PositionDirection.LONG,
       triggerPrice: null,
       triggerCondition: TriggerCondition.ABOVE,
@@ -188,6 +179,5 @@ export const useTradingStore = create<TradingState>((set) => ({
       orderSubmitted: false,
       orderTxid: null,
       showConfirmation: false,
-      activeTab: OrderTypeOption.LIMIT,
     }),
 }));

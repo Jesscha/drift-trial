@@ -1,5 +1,5 @@
-import { formatBN } from "../../utils/number";
-import { getTokenIconUrl } from "../../utils/url";
+import { formatBN } from "@/utils/formatting";
+import { getTokenIconUrl } from "@/utils/assets";
 import { PerpPositionWithPNL } from "../../hooks/usePNLUserData";
 import { BASE_PRECISION, PositionDirection } from "@drift-labs/sdk";
 import { usePerpOrder } from "../../hooks/usePerpOrder";
@@ -140,7 +140,7 @@ export function PositionsTable({
         <tbody className="text-sm">
           {positions.map((position) => {
             const marketData = markets[position.marketIndex];
-            const isLong = position.baseAssetAmount.gt(0);
+            const isLong = !position.baseAssetAmount.isNeg();
             const pnlClass = position.unsettledPnl?.isNeg()
               ? "text-red-50"
               : !position.unsettledPnl?.isZero()

@@ -1,49 +1,38 @@
 import { useCallback } from "react";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import {
-  getSDKOrderType,
-  OrderTypeOption,
-} from "@/app/components/modal/TradingModal.util";
+import { getOrderTypeFromTab } from "@/app/components/modal/TradingModal.util";
+import { TradingModalTab } from "@/types";
 
 export const useOrderType = () => {
   const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
-  const setSelectedCustomOrderType = useTradingStore(
-    (state) => state.setSelectedCustomOrderType
-  );
   const setOrderType = useTradingStore((state) => state.setSelectedOrderType);
 
   const activeTab = useTradingStore((state) => state.activeTab);
   const setActiveTab = useTradingStore((state) => state.setActiveTab);
 
   const handleTabChange = useCallback(
-    (tab: OrderTypeOption) => {
+    (tab: TradingModalTab) => {
       setActiveTab(tab);
-      setSelectedCustomOrderType(tab);
-      setOrderType(getSDKOrderType(tab));
+      setOrderType(getOrderTypeFromTab(tab));
     },
-    [setActiveTab, setSelectedCustomOrderType, setOrderType]
+    [setActiveTab, setOrderType]
   );
 
   const handleProOrderSelect = useCallback(
-    (value: string | number) => {
-      const orderType = value as OrderTypeOption;
-      setActiveTab(orderType);
-      setSelectedCustomOrderType(orderType);
-      setOrderType(orderType);
+    (value: TradingModalTab) => {
+      setActiveTab(value);
+      setOrderType(getOrderTypeFromTab(value));
     },
-    [setActiveTab, setSelectedCustomOrderType, setOrderType]
+    [setActiveTab, setOrderType]
   );
-  const orderTabs = [OrderTypeOption.MARKET, OrderTypeOption.LIMIT];
+  const orderTabs = ["market", "limit"] as const;
 
   const proOrderTypes = [
-    OrderTypeOption.STOP_MARKET,
-    OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT_MARKET,
-    OrderTypeOption.TAKE_PROFIT_LIMIT,
-  ];
+    "stop-loss-market",
+    "stop-loss-limit",
+    "take-profit-market",
+    "take-profit-limit",
+  ] as const;
 
   const proOrderOptions = proOrderTypes.map((type) => ({
     value: type,
@@ -52,7 +41,6 @@ export const useOrderType = () => {
 
   return {
     selectedOrderType,
-    selectedCustomOrderType,
     activeTab,
     orderTabs,
     proOrderTypes,

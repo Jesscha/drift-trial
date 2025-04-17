@@ -4,7 +4,6 @@ import { useTradingStore } from "@/app/stores/tradingStore";
 import { usePerpOrder } from "@/app/hooks/usePerpOrder";
 import { useTransactions } from "@/app/hooks/useTransactions";
 import {
-  OrderTypeOption,
   isMarketTriggerOrderType,
   isLimitTriggerOrderType,
 } from "@/app/components/modal/TradingModal.util";
@@ -19,9 +18,6 @@ export const useOrderExecution = (
   const triggerCondition = useTradingStore((state) => state.triggerCondition);
   const selectedDirection = useTradingStore((state) => state.selectedDirection);
   const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
   const useScaleOrders = useTradingStore((state) => state.useScaleOrders);
   const numScaleOrders = useTradingStore((state) => state.numScaleOrders);
   const minPrice = useTradingStore((state) => state.minPrice);
@@ -123,7 +119,7 @@ export const useOrderExecution = (
       // Check if scale orders are enabled for limit orders
       else if (
         useScaleOrders &&
-        selectedCustomOrderType === OrderTypeOption.LIMIT &&
+        selectedOrderType === OrderType.LIMIT &&
         priceNum
       ) {
         // For long positions, max should be current price, min should be lower
@@ -153,12 +149,9 @@ export const useOrderExecution = (
         result = await placeScaleOrders(scaleParams);
       }
       // Use original order logic for standard orders
-      else if (selectedCustomOrderType === OrderTypeOption.MARKET) {
+      else if (selectedOrderType === OrderType.MARKET) {
         result = await placeMarketOrder(marketIndex, direction, sizeNum);
-      } else if (
-        selectedCustomOrderType === OrderTypeOption.LIMIT &&
-        priceNum
-      ) {
+      } else if (selectedOrderType === OrderType.LIMIT && priceNum) {
         result = await placeLimitOrder(
           marketIndex,
           direction,
@@ -166,7 +159,7 @@ export const useOrderExecution = (
           priceNum
         );
       } else if (
-        isMarketTriggerOrderType(selectedCustomOrderType) &&
+        isMarketTriggerOrderType(selectedOrderType) &&
         triggerPriceNum
       ) {
         result = await placeTriggerMarketOrder(
@@ -178,7 +171,7 @@ export const useOrderExecution = (
           false // reduceOnly
         );
       } else if (
-        isLimitTriggerOrderType(selectedCustomOrderType) &&
+        isLimitTriggerOrderType(selectedOrderType) &&
         triggerPriceNum &&
         priceNum
       ) {
@@ -217,7 +210,6 @@ export const useOrderExecution = (
     triggerCondition,
     selectedDirection,
     selectedOrderType,
-    selectedCustomOrderType,
     enableTakeProfit,
     takeProfitPrice,
     takeProfitOrderType,
@@ -251,9 +243,9 @@ export const useOrderExecution = (
     isOrderLoading ||
     orderSubmitted ||
     size === 0 ||
-    (selectedCustomOrderType !== OrderTypeOption.MARKET && !price) ||
-    (isMarketTriggerOrderType(selectedCustomOrderType) && !triggerPrice) ||
-    (isLimitTriggerOrderType(selectedCustomOrderType) &&
+    (selectedOrderType !== OrderType.MARKET && !price) ||
+    (isMarketTriggerOrderType(selectedOrderType) && !triggerPrice) ||
+    (isLimitTriggerOrderType(selectedOrderType) &&
       (!triggerPrice || price === 0));
 
   // Close modal when transaction is confirmed

@@ -10,7 +10,7 @@ import { useWalletTokenBalances } from "@/app/hooks/useWalletTokenBalances";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { BN } from "@drift-labs/sdk";
 import { formatBN } from "../../utils/number";
-import { getTokenIconUrl } from "@/app/utils/url";
+import { getTokenIconUrl } from "@/utils/assets";
 
 /**
  * Hook for managing all data-related aspects of deposit/withdraw functionality
@@ -30,7 +30,7 @@ export const useDepositWithdrawData = () => {
   const { activeAccount, getWithdrawalLimit, activeAccountId } =
     useActiveAccount();
   const { marketsList } = useSpotMarketAccounts();
-  const { tokenBalances } = useWalletTokenBalances();
+  const { walletTokenBalances } = useWalletTokenBalances();
 
   // Get all subaccount token balances
   const subaccountTokenBalances = useMemo(() => {
@@ -102,12 +102,12 @@ export const useDepositWithdrawData = () => {
 
   // Get wallet balance for the selected token
   const currentWalletTokenBalance = useMemo(() => {
-    const tokenInfo = tokenBalances.find(
+    const tokenInfo = walletTokenBalances.find(
       (t) => t.tokenMint === tokenSelectionInfo.mint
     );
 
     return tokenInfo ? tokenInfo.balance : 0;
-  }, [tokenBalances, tokenSelectionInfo.mint]);
+  }, [walletTokenBalances, tokenSelectionInfo.mint]);
 
   // Calculate maximum available amount for transaction
   const maxAmount = useMemo(() => {
@@ -203,10 +203,10 @@ export const useDepositWithdrawData = () => {
 
     if (mode === TransactionMode.DEPOSIT) {
       // For DEPOSIT mode: prioritize tokens that the user has in their wallet
-      if (tokenBalances && tokenBalances.length > 0) {
+      if (walletTokenBalances && walletTokenBalances.length > 0) {
         // First enrich options with dollar values from wallet balances
         const enrichedOptions = baseOptions.map((option) => {
-          const matchingToken = tokenBalances.find(
+          const matchingToken = walletTokenBalances.find(
             (token) => token.tokenMint === option.mint
           );
 
@@ -265,7 +265,7 @@ export const useDepositWithdrawData = () => {
     }
   }, [
     marketsList,
-    tokenBalances,
+    walletTokenBalances,
     mode,
     subaccountTokenBalances,
     activeAccountId,

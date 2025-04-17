@@ -1,4 +1,4 @@
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
+import { TriggerCondition } from "@/types/orders";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { CustomDropdown } from "../CustomDropdown";
 

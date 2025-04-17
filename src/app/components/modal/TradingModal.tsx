@@ -7,11 +7,7 @@ import { usePerpMarketAccounts } from "@/app/hooks/usePerpMarketAccounts";
 import { OrderBook } from "../trading/OrderBook";
 import { useEffect } from "react";
 import { useTradingStore } from "@/app/stores/tradingStore";
-import {
-  formatMarketName,
-  isTriggerOrderType,
-  OrderTypeOption,
-} from "./TradingModal.util";
+import { formatMarketName, isTriggerOrderType } from "./TradingModal.util";
 import { OrderConfirmationModal } from "./OrderConfirmationModal";
 import { useOrderPrice, useOrderExecution } from "@/app/hooks/trading";
 import { OrderButton } from "@/app/components/trading/OrderButton";
@@ -38,9 +34,7 @@ export const TradingModal = ({
 }) => {
   const { marketsList } = usePerpMarketAccounts();
   const { data, isLoading } = useOrderBook(marketsList[marketIndex]?.name);
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
+  const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
 
   const setOrderDirection = useTradingStore(
     (state) => state.setSelectedDirection
@@ -107,7 +101,7 @@ export const TradingModal = ({
 
           <OrderInputSection marketIndex={marketIndex} />
 
-          {isTriggerOrderType(selectedCustomOrderType) && (
+          {isTriggerOrderType(selectedOrderType) && (
             <TriggerConditionDropdown />
           )}
 
@@ -116,9 +110,7 @@ export const TradingModal = ({
             marketIndex={marketIndex}
           />
 
-          {selectedCustomOrderType === OrderTypeOption.LIMIT && (
-            <ScaleOrdersSection />
-          )}
+          {selectedOrderType === OrderType.LIMIT && <ScaleOrdersSection />}
 
           <TakeProfitStopLossSection marketIndex={marketIndex} />
 

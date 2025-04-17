@@ -3,13 +3,16 @@ import { useState, useCallback } from "react";
 import { useActiveAccount } from "@/app/providers/ActiveAccountProvider";
 import { useDriftClient } from "./useDriftClient";
 import { useTransactions } from "./useTransactions";
-import { TransactionSuccessActionType } from "@/services/txTracker/txTracker";
+import { TransactionSuccessActionType } from "@/types/transactions";
 import {
   PlacePerpOrderParams,
   OrderResult,
   TriggerCondition,
+  ScaleOrderParams,
+  OrderWithTPSLParams,
+} from "@/types/orders";
+import {
   placeOrders,
-  getTriggerConditionObject,
   placePerpOrder,
   placeLimitOrder as serviceLimitOrder,
   placeOracleOrder as serviceOracleOrder,
@@ -17,48 +20,6 @@ import {
   placeTriggerLimitOrder as serviceTriggerLimitOrder,
   cancelOrder as cancelOrderService,
 } from "@/services/drift/order";
-
-export { TriggerCondition, getTriggerConditionObject };
-export type { PlacePerpOrderParams, OrderResult };
-
-export type ScaleOrderDistribution =
-  | "ascending"
-  | "descending"
-  | "random"
-  | "flat";
-
-export interface ScaleOrderParams {
-  marketIndex: number;
-  direction: PositionDirection;
-  size: number; // Total size to distribute across orders
-  minPrice: number;
-  maxPrice: number;
-  numOrders: number;
-  reduceOnly?: boolean;
-  distribution?: ScaleOrderDistribution; // Optional distribution pattern
-}
-
-export interface OrderWithTPSLParams {
-  marketIndex: number;
-  direction: PositionDirection;
-  size: number;
-  price?: number; // For limit orders
-  orderType: OrderType;
-  reduceOnly?: boolean;
-  oraclePriceOffset?: number; // For oracle orders
-  takeProfit?: {
-    price: number;
-    size?: number; // If not provided, will use the entire position size
-    orderType?: OrderType; // LIMIT or MARKET
-    limitPrice?: number; // For TP limit orders
-  };
-  stopLoss?: {
-    price: number;
-    size?: number; // If not provided, will use the entire position size
-    orderType?: OrderType; // LIMIT or MARKET
-    limitPrice?: number; // For SL limit orders
-  };
-}
 
 export function usePerpOrder() {
   const { client } = useDriftClient();

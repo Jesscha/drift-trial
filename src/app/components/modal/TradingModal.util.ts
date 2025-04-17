@@ -1,16 +1,6 @@
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { DropdownOption } from "../CustomDropdown";
-
-// Define order types that map to SDK OrderType
-export enum OrderTypeOption {
-  MARKET = "Market",
-  LIMIT = "Limit",
-  STOP_MARKET = "Stop Market",
-  STOP_LIMIT = "Stop Limit",
-  TAKE_PROFIT_MARKET = "Take Profit Market",
-  TAKE_PROFIT_LIMIT = "Take Profit Limit",
-}
+import { TradingModalTab } from "@/types/orders";
 
 export const distributionOptions: DropdownOption[] = [
   { value: "ascending", label: "Ascending (Entry → Target)" },
@@ -18,46 +8,6 @@ export const distributionOptions: DropdownOption[] = [
   { value: "random", label: "Random" },
   { value: "flat", label: "Flat (Evenly spaced)" },
 ];
-
-/**
- * Maps our UI-friendly order types to SDK order types
- */
-export const getSDKOrderType = (orderType: OrderTypeOption): OrderType => {
-  switch (orderType) {
-    case OrderTypeOption.MARKET:
-      return OrderType.MARKET;
-    case OrderTypeOption.LIMIT:
-      return OrderType.LIMIT;
-    case OrderTypeOption.STOP_MARKET:
-    case OrderTypeOption.TAKE_PROFIT_MARKET:
-      return OrderType.TRIGGER_MARKET;
-    case OrderTypeOption.STOP_LIMIT:
-    case OrderTypeOption.TAKE_PROFIT_LIMIT:
-      return OrderType.TRIGGER_LIMIT;
-    default:
-      return OrderType.MARKET;
-  }
-};
-
-/**
- * Helper to create mapping for SDK order type to UI order type (for initialization)
- */
-export const mapSDKToUIOrderType = (
-  sdkOrderType: OrderType
-): OrderTypeOption => {
-  switch (sdkOrderType) {
-    case OrderType.MARKET:
-      return OrderTypeOption.MARKET;
-    case OrderType.LIMIT:
-      return OrderTypeOption.LIMIT;
-    case OrderType.TRIGGER_MARKET:
-      return OrderTypeOption.STOP_MARKET; // Default to Stop Market for trigger market
-    case OrderType.TRIGGER_LIMIT:
-      return OrderTypeOption.STOP_LIMIT; // Default to Stop Limit for trigger limit
-    default:
-      return OrderTypeOption.MARKET;
-  }
-};
 
 /**
  * Formats a market name by removing the "-PERP" suffix
@@ -74,78 +24,31 @@ export const calculateUsdValue = (size: number, price: number): number => {
   return size * price;
 };
 
+export const getOrderTypeFromTab = (tab: TradingModalTab): OrderType => {
+  switch (tab) {
+    case "market":
+      return OrderType.MARKET;
+    case "limit":
+      return OrderType.LIMIT;
+    case "stop-loss-market":
+      return OrderType.TRIGGER_MARKET;
+    case "stop-loss-limit":
+      return OrderType.TRIGGER_LIMIT;
+    case "take-profit-market":
+      return OrderType.TRIGGER_MARKET;
+    case "take-profit-limit":
+      return OrderType.TRIGGER_LIMIT;
+    default:
+      return OrderType.MARKET;
+  }
+};
+
 /**
  * Calculate size: usdValue / price
  */
 export const calculateSize = (usdValue: number, price: number): number => {
   if (price === 0) return 0;
   return usdValue / price;
-};
-
-/**
- * Get the order type display info for UI rendering
- */
-export const getOrderTypeInfo = () => ({
-  [OrderTypeOption.MARKET]: {
-    label: "Market",
-    description: "Execute at current market price",
-    color: "text-blue-500",
-  },
-  [OrderTypeOption.LIMIT]: {
-    label: "Limit",
-    description: "Execute at specified price or better",
-    color: "text-green-500",
-  },
-  [OrderTypeOption.STOP_MARKET]: {
-    label: "Stop Market",
-    description: "Market order when trigger price is reached",
-    color: "text-purple-400",
-  },
-  [OrderTypeOption.STOP_LIMIT]: {
-    label: "Stop Limit",
-    description: "Limit order when trigger price is reached",
-    color: "text-purple-500",
-  },
-  [OrderTypeOption.TAKE_PROFIT_MARKET]: {
-    label: "Take Profit",
-    description: "Market order to take profit at target price",
-    color: "text-green-500",
-  },
-  [OrderTypeOption.TAKE_PROFIT_LIMIT]: {
-    label: "Take Profit Limit",
-    description: "Limit order to take profit at target price",
-    color: "text-green-400",
-  },
-});
-
-/**
- * Get default trigger condition based on order type and position direction
- */
-export const getDefaultTriggerCondition = (
-  orderType: OrderTypeOption,
-  direction: PositionDirection
-): TriggerCondition => {
-  if (
-    (orderType === OrderTypeOption.STOP_MARKET ||
-      orderType === OrderTypeOption.STOP_LIMIT) &&
-    direction === PositionDirection.LONG
-  ) {
-    return TriggerCondition.BELOW;
-  } else if (
-    (orderType === OrderTypeOption.TAKE_PROFIT_MARKET ||
-      orderType === OrderTypeOption.TAKE_PROFIT_LIMIT) &&
-    direction === PositionDirection.LONG
-  ) {
-    return TriggerCondition.ABOVE;
-  } else if (
-    (orderType === OrderTypeOption.STOP_MARKET ||
-      orderType === OrderTypeOption.STOP_LIMIT) &&
-    direction === PositionDirection.SHORT
-  ) {
-    return TriggerCondition.ABOVE;
-  } else {
-    return TriggerCondition.BELOW;
-  }
 };
 
 /**
@@ -196,77 +99,49 @@ export const isAtMaxValue = (value: number, max: number): boolean => {
 /**
  * Check if an order type is a limit-based order
  */
-export const isLimitOrderType = (orderType: OrderTypeOption): boolean => {
-  return [
-    OrderTypeOption.LIMIT,
-    OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT_LIMIT,
-  ].includes(orderType);
+export const isLimitOrderType = (orderType: OrderType): boolean => {
+  return orderType === OrderType.LIMIT || orderType === OrderType.TRIGGER_LIMIT;
 };
 
 /**
  * Check if an order type is a trigger-based order
  */
-export const isTriggerOrderType = (orderType: OrderTypeOption): boolean => {
-  return [
-    OrderTypeOption.STOP_MARKET,
-    OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT_MARKET,
-    OrderTypeOption.TAKE_PROFIT_LIMIT,
-  ].includes(orderType);
+export const isTriggerOrderType = (orderType: OrderType): boolean => {
+  return (
+    orderType === OrderType.TRIGGER_MARKET ||
+    orderType === OrderType.TRIGGER_LIMIT
+  );
 };
 
 /**
  * Check if an order type is a stop-based trigger order
  */
-export const isStopOrderType = (orderType: OrderTypeOption): boolean => {
-  return [OrderTypeOption.STOP_MARKET, OrderTypeOption.STOP_LIMIT].includes(
-    orderType
+export const isStopOrderType = (orderType: OrderType): boolean => {
+  return (
+    orderType === OrderType.TRIGGER_MARKET ||
+    orderType === OrderType.TRIGGER_LIMIT
   );
-};
-
-/**
- * Check if an order type is a take-profit-based trigger order
- */
-export const isTakeProfitOrderType = (orderType: OrderTypeOption): boolean => {
-  return [
-    OrderTypeOption.TAKE_PROFIT_MARKET,
-    OrderTypeOption.TAKE_PROFIT_LIMIT,
-  ].includes(orderType);
 };
 
 /**
  * Check if an order type is a market-based trigger order
  */
-export const isMarketTriggerOrderType = (
-  orderType: OrderTypeOption
-): boolean => {
-  return [
-    OrderTypeOption.STOP_MARKET,
-    OrderTypeOption.TAKE_PROFIT_MARKET,
-  ].includes(orderType);
+export const isMarketTriggerOrderType = (orderType: OrderType): boolean => {
+  return orderType === OrderType.TRIGGER_MARKET;
 };
 
 /**
  * Check if an order type is a limit-based trigger order
  */
-export const isLimitTriggerOrderType = (
-  orderType: OrderTypeOption
-): boolean => {
-  return [
-    OrderTypeOption.STOP_LIMIT,
-    OrderTypeOption.TAKE_PROFIT_LIMIT,
-  ].includes(orderType);
+export const isLimitTriggerOrderType = (orderType: OrderType): boolean => {
+  return orderType === OrderType.TRIGGER_LIMIT;
 };
 
 /**
  * Check if limit price section should be displayed
  */
-export const shouldShowLimitPrice = (orderType: OrderTypeOption): boolean => {
-  return (
-    orderType === OrderTypeOption.LIMIT ||
-    orderType === OrderTypeOption.STOP_LIMIT
-  );
+export const shouldShowLimitPrice = (orderType: OrderType): boolean => {
+  return orderType === OrderType.LIMIT || orderType === OrderType.TRIGGER_LIMIT;
 };
 
 /**
