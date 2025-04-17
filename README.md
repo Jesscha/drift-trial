@@ -29,7 +29,7 @@ A Next.js-based dashboard for interacting with the Drift Protocol on Solana bloc
 
 ### Prerequisites
 
-- Node.js 18.x or later
+- Node.js 19.x or later
 - pnpm
 - A Solana wallet (Phantom, Solflare, etc.)
 
