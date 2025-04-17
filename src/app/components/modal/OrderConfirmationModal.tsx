@@ -1,6 +1,5 @@
 import { PositionDirection } from "@drift-labs/sdk";
 import { useCallback } from "react";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { formatNumber } from "@/app/utils/number";
 import {
   OrderTypeOption,
@@ -9,6 +8,7 @@ import {
 } from "./TradingModal.util";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { MarketData } from "@/app/hooks/usePerpMarketAccounts";
+import { TriggerCondition } from "@/types";
 
 interface OrderConfirmationModalProps {
   showConfirmation: boolean;

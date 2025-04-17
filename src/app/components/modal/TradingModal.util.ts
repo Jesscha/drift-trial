@@ -1,6 +1,6 @@
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
 import { DropdownOption } from "../CustomDropdown";
+import { TriggerCondition } from "@/types";
 
 // Define order types that map to SDK OrderType
 export enum OrderTypeOption {
