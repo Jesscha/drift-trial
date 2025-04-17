@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { formatBN } from "../../utils/number";
-import { AccountSummary } from "./AccountSummary";
 import { PositionsTable } from "./PositionsTable";
 import { OrdersTable } from "./OrdersTable";
 import { ChevronDownIcon } from "../../assets/icons";
@@ -34,39 +33,58 @@ export function AccountCard({
 
   return (
     <div className="border border-neutrals-20 dark:border-neutrals-70 rounded-lg overflow-hidden shadow-sm">
-      {/* Account Header */}
       <div
         className="bg-neutrals-5 dark:bg-neutrals-90 p-4 cursor-pointer flex justify-between items-center"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-3">
-          <div className="bg-neutrals-10 dark:bg-neutrals-80 rounded-full h-8 w-8 flex items-center justify-center">
-            <span className="text-sm font-semibold text-purple-50">
-              #{account.subAccountId}
-            </span>
-          </div>
-          <div>
+          <div className="w-80">
             <h3 className="font-medium text-base">{accountName}</h3>
             <div className="flex items-center mt-1">
-              <span className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-80 rounded-full text-neutrals-60 dark:text-neutrals-40">
+              <span className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-70 rounded-full text-neutrals-60 dark:text-neutrals-40">
                 {account.perpPositions.length} positions
               </span>
               <span className="mx-1 text-xs text-neutrals-60 dark:text-neutrals-40">
                 •
               </span>
-              <span className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-80 rounded-full text-neutrals-60 dark:text-neutrals-40">
+              <span className="text-xs px-2 py-0.5 bg-neutrals-10 dark:bg-neutrals-70 rounded-full text-neutrals-60 dark:text-neutrals-40">
                 {activeOrders.length} orders
               </span>
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div>
-            <p className="text-xs text-neutrals-60 dark:text-neutrals-40">
-              Net Value
-            </p>
-            <p className="font-bold">${formatBN(account.netTotal, true)}</p>
+          <div className="flex w-full justify-around">
+            <div className="mr-4">
+              <p className="text-xs text-neutrals-60 dark:text-neutrals-40">
+                Deposit
+              </p>
+              <p className="font-medium">
+                ${formatBN(account.depositAmount, true)}
+              </p>
+            </div>
+            <div className="mr-4">
+              <p className="text-xs text-neutrals-60 dark:text-neutrals-40">
+                Unsettled PnL
+              </p>
+              <p
+                className={`font-medium ${
+                  parseFloat(account.netUnsettledPnl.toString()) >= 0
+                    ? "text-green-50"
+                    : "text-red-50"
+                }`}
+              >
+                ${formatBN(account.netUnsettledPnl, true)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-neutrals-60 dark:text-neutrals-40">
+                Net Value
+              </p>
+              <p>${formatBN(account.netTotal, true)}</p>
+            </div>
           </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
           {!viewOnly && onDeposit && (
             <button
               onClick={(e) => {
@@ -113,15 +131,8 @@ export function AccountCard({
       {/* Account Details (expanded) */}
       {isExpanded && (
         <div className="p-5 bg-neutrals-5 dark:bg-neutrals-90">
-          {/* Account Summary Details */}
-          <AccountSummary
-            depositAmount={account.depositAmount}
-            netUnsettledPnl={account.netUnsettledPnl}
-            netTotal={account.netTotal}
-          />
-
           {/* Positions Section */}
-          <div className="mt-6">
+          <div>
             <h4 className="text-base font-medium mb-3 text-neutrals-100 dark:text-neutrals-10">
               Positions
             </h4>
