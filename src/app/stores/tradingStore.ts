@@ -93,8 +93,8 @@ export const useTradingStore = create<TradingState>((set) => ({
   usdValue: 0,
   sizePercentage: 50,
 
-  selectedOrderType: OrderType.MARKET,
-  selectedCustomOrderType: OrderTypeOption.MARKET,
+  selectedOrderType: OrderType.LIMIT,
+  selectedCustomOrderType: OrderTypeOption.LIMIT,
   selectedDirection: PositionDirection.LONG,
 
   triggerPrice: null,
@@ -120,7 +120,7 @@ export const useTradingStore = create<TradingState>((set) => ({
   orderTxid: null,
   showConfirmation: false,
 
-  activeTab: OrderTypeOption.MARKET,
+  activeTab: OrderTypeOption.LIMIT,
 
   // Simple setter actions
   setSize: (size) => set({ size }),
@@ -167,8 +167,8 @@ export const useTradingStore = create<TradingState>((set) => ({
       price: null,
       usdValue: 0,
       sizePercentage: 50,
-      selectedOrderType: OrderType.MARKET,
-      selectedCustomOrderType: OrderTypeOption.MARKET,
+      selectedOrderType: OrderType.LIMIT,
+      selectedCustomOrderType: OrderTypeOption.LIMIT,
       selectedDirection: PositionDirection.LONG,
       triggerPrice: null,
       triggerCondition: TriggerCondition.ABOVE,
@@ -188,6 +188,6 @@ export const useTradingStore = create<TradingState>((set) => ({
       orderSubmitted: false,
       orderTxid: null,
       showConfirmation: false,
-      activeTab: OrderTypeOption.MARKET,
+      activeTab: OrderTypeOption.LIMIT,
     }),
 }));

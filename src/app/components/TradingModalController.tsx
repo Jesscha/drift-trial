@@ -142,7 +142,7 @@ export const TradingModalController = () => {
         <TradingModal
           marketIndex={selectedMarketIndex}
           orderDirection={orderDirection}
-          orderType={OrderType.MARKET}
+          orderType={OrderType.LIMIT}
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
