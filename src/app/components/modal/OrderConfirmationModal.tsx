@@ -1,11 +1,7 @@
-import { PositionDirection } from "@drift-labs/sdk";
+import { OrderType, PositionDirection } from "@drift-labs/sdk";
 import { useCallback } from "react";
 import { formatNumber } from "@/app/utils/number";
-import {
-  OrderTypeOption,
-  formatMarketName,
-  isTriggerOrderType,
-} from "./TradingModal.util";
+import { formatMarketName, isTriggerOrderType } from "./TradingModal.util";
 import { useTradingStore } from "@/app/stores/tradingStore";
 import { MarketData } from "@/app/hooks/usePerpMarketAccounts";
 import { TriggerCondition } from "@/types";
@@ -48,9 +44,8 @@ export const OrderConfirmationModal = ({
   const minPrice = useTradingStore((state) => state.minPrice);
   const maxPrice = useTradingStore((state) => state.maxPrice);
   const scaleDistribution = useTradingStore((state) => state.scaleDistribution);
-  const selectedCustomOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
+  const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
+  const activeTab = useTradingStore((state) => state.activeTab);
   const usdValue = useTradingStore((state) => state.usdValue);
 
   // Function to get formatted order type description for confirmation modal
@@ -62,11 +57,7 @@ export const OrderConfirmationModal = ({
     let detailDescription = "";
     let additionalNotes = "";
 
-    if (
-      useScaleOrders &&
-      selectedCustomOrderType === OrderTypeOption.LIMIT &&
-      price
-    ) {
+    if (useScaleOrders && selectedOrderType === OrderType.LIMIT && price) {
       const priceVal = price;
       const minPriceVal = minPrice !== null ? minPrice : priceVal * 0.95;
       const maxPriceVal = maxPrice !== null ? maxPrice : priceVal * 1.05;
@@ -82,14 +73,14 @@ export const OrderConfirmationModal = ({
 
       detailDescription = `Scale Orders (${numScaleOrders}) from ${minPriceVal} to ${maxPriceVal} - ${distributionText}`;
     } else {
-      switch (selectedCustomOrderType) {
-        case OrderTypeOption.MARKET:
+      switch (activeTab) {
+        case "market":
           detailDescription = "at Market";
           break;
-        case OrderTypeOption.LIMIT:
+        case "limit":
           detailDescription = price ? `Limit at ${price}` : "";
           break;
-        case OrderTypeOption.STOP_MARKET:
+        case "stop-loss-market":
           detailDescription =
             triggerPrice && triggerCondition !== undefined
               ? `Stop Market when ${
@@ -99,7 +90,7 @@ export const OrderConfirmationModal = ({
                 } ${triggerPrice}`
               : "";
           break;
-        case OrderTypeOption.STOP_LIMIT:
+        case "stop-loss-limit":
           detailDescription =
             triggerPrice && price
               ? `Stop Limit ${price} when ${
@@ -109,7 +100,7 @@ export const OrderConfirmationModal = ({
                 } ${triggerPrice}`
               : "";
           break;
-        case OrderTypeOption.TAKE_PROFIT_MARKET:
+        case "take-profit-market":
           detailDescription =
             triggerPrice && triggerCondition !== undefined
               ? `Take Profit when ${
@@ -119,7 +110,7 @@ export const OrderConfirmationModal = ({
                 } ${triggerPrice}`
               : "";
           break;
-        case OrderTypeOption.TAKE_PROFIT_LIMIT:
+        case "take-profit-limit":
           detailDescription =
             triggerPrice && price
               ? `Take Profit Limit ${price} when ${
@@ -137,7 +128,7 @@ export const OrderConfirmationModal = ({
     // Add TP/SL information if enabled
     if (
       (enableTakeProfit || enableStopLoss) &&
-      !isTriggerOrderType(selectedCustomOrderType)
+      !isTriggerOrderType(selectedOrderType)
     ) {
       if (enableTakeProfit) {
         const tpPrice =
@@ -174,7 +165,7 @@ export const OrderConfirmationModal = ({
     size,
     marketsList,
     marketIndex,
-    selectedCustomOrderType,
+    selectedOrderType,
     price,
     triggerPrice,
     triggerCondition,

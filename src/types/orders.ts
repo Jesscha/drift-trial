@@ -120,3 +120,14 @@ export interface OrderWithTPSLParams {
     limitPrice?: number; // For SL limit orders
   };
 }
+
+/**
+ * Active tab for the trading modal
+ */
+export type TradingModalTab =
+  | "market"
+  | "limit"
+  | "stop-loss-market"
+  | "stop-loss-limit"
+  | "take-profit-market"
+  | "take-profit-limit";

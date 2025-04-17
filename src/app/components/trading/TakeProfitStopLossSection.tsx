@@ -54,9 +54,7 @@ export const TakeProfitStopLossSection = ({
   const setStopLossLimitPrice = useTradingStore(
     (state) => state.setStopLossLimitPrice
   );
-  const customOrderType = useTradingStore(
-    (state) => state.selectedCustomOrderType
-  );
+  const selectedOrderType = useTradingStore((state) => state.selectedOrderType);
 
   // Get oracle price as backup
   const { oraclePrice: oraclePriceBN } = useOraclePrice(marketIndex);
@@ -103,7 +101,7 @@ export const TakeProfitStopLossSection = ({
     setStopLossLimitPrice,
   ]);
 
-  if (isTriggerOrderType(customOrderType)) {
+  if (isTriggerOrderType(selectedOrderType)) {
     return null;
   }
 
