@@ -140,7 +140,7 @@ export function PositionsTable({
         <tbody className="text-sm">
           {positions.map((position) => {
             const marketData = markets[position.marketIndex];
-            const isLong = position.baseAssetAmount.gt(0);
+            const isLong = !position.baseAssetAmount.isNeg();
             const pnlClass = position.unsettledPnl?.isNeg()
               ? "text-red-50"
               : !position.unsettledPnl?.isZero()
