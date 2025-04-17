@@ -49,7 +49,7 @@ export function PositionsTable({
   }
 
   const handleOpenCloseModal = (position: PerpPositionWithPNL) => {
-    const isLong = position.baseAssetAmount.gt(0);
+    const isLong = !position.baseAssetAmount.isNeg();
     const pnlClass = position.unsettledPnl?.isNeg()
       ? "text-red-50"
       : !position.unsettledPnl?.isZero()
@@ -89,12 +89,10 @@ export function PositionsTable({
       const position = closeModalState.position;
       setClosingPositionMarketIndex(position.marketIndex);
 
-      // To close a position, we place a market order in the opposite direction with the same size
-      const closeDirection = position.baseAssetAmount.gt(0)
-        ? PositionDirection.SHORT
-        : PositionDirection.LONG;
+      const closeDirection = position.baseAssetAmount.isNeg()
+        ? PositionDirection.LONG
+        : PositionDirection.SHORT;
 
-      // Get the size without the negative sign
       const size = position.baseAssetAmount.abs().toString();
 
       const result = await placeMarketOrder(
@@ -151,7 +149,7 @@ export function PositionsTable({
               position.quoteEntryAmount
                 .abs()
                 .mul(BASE_PRECISION)
-                .div(position.baseAssetAmount),
+                .div(position.baseAssetAmount.abs()),
               true,
               2
             );
