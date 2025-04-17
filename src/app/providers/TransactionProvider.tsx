@@ -1,9 +1,10 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
-import txTracker, {
+import txTracker from "@/services/txTracker/txTracker";
+import {
   TransactionInfo,
   TransactionSuccessAction,
-} from "@/services/txTracker/txTracker";
+} from "@/types/transactions";
 import { useUserAccounts } from "../hooks/useUserAccounts";
 
 export interface TransactionContextType {

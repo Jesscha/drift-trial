@@ -2,6 +2,7 @@ import { BN } from "@drift-labs/sdk";
 import useSWR from "swr";
 import { getSpotOraclePrice } from "@/services/drift/market";
 import { useDriftClient } from "./useDriftClient";
+import { CACHE_TTL_MS } from "@/types/markets";
 
 /**
  * Hook to fetch and cache oracle price for a specific spot market
@@ -39,7 +40,7 @@ export function useSpotOraclePrice(
       refreshInterval: refreshInterval,
       shouldRetryOnError: true,
       errorRetryCount: 3,
-      dedupingInterval: 3000, // Deduplicate requests within 1 second
+      dedupingInterval: CACHE_TTL_MS, // Use the standardized cache TTL
     }
   );
 

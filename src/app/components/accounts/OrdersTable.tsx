@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { formatBN } from "../../utils/number";
-import { getTokenIconUrl } from "../../utils/url";
+import { formatBN } from "@/utils/formatting";
+import { getTokenIconUrl } from "@/utils/assets";
 import { Order, OrderType } from "@drift-labs/sdk";
 import { usePerpOrder } from "../../hooks/usePerpOrder";
 import { useTransactions } from "../../hooks/useTransactions";

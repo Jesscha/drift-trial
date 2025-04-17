@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TransactionStatus } from "@/services/txTracker/txTracker";
+import { TransactionStatus } from "@/types/transactions";
 
 interface TransactionToastProps {
   signature: string;

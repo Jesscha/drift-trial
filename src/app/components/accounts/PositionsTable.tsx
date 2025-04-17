@@ -1,5 +1,5 @@
-import { formatBN } from "../../utils/number";
-import { getTokenIconUrl } from "../../utils/url";
+import { formatBN } from "@/utils/formatting";
+import { getTokenIconUrl } from "@/utils/assets";
 import { PerpPositionWithPNL } from "../../hooks/usePNLUserData";
 import { BASE_PRECISION, PositionDirection } from "@drift-labs/sdk";
 import { usePerpOrder } from "../../hooks/usePerpOrder";

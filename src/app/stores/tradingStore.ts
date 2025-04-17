@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { OrderType, PositionDirection } from "@drift-labs/sdk";
-import { TriggerCondition } from "@/app/hooks/usePerpOrder";
+import { TriggerCondition } from "@/types/orders";
 import { OrderTypeOption } from "../components/modal/TradingModal.util";
 
 interface TradingState {
