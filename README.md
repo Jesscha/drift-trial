@@ -80,6 +80,10 @@ src/
 │   └── txTracker/        # Transaction tracking
 ```
 
+The project layer
+
+![](/doc/structure.png)
+
 ## Drift Protocol Integration
 
 The application integrates with the Drift Protocol using the official SDK. Key functionality includes:
