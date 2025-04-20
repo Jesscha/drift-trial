@@ -80,7 +80,7 @@ export function useWalletTokenBalances() {
     }
   );
 
-  // Fetch oracle prices for all markets
+  // TODO: do not have to be separate swr, it is only making code complex
   const { data: oraclePrices } = useSWR<Record<number, BN | null>>(
     marketsList.length > 0 ? "wallet-oracle-prices" : null,
     async () => {
@@ -170,26 +170,6 @@ export function useWalletTokenBalances() {
           priceUsd,
           tokenMint: mint,
           icon: getTokenIconUrl(symbol),
-        });
-      }
-      // For tokens without matching markets, we still want to show them
-      else {
-        // Try to extract a symbol from the mint (last 4 chars as a simple heuristic)
-        const derivedSymbol = mint.slice(-4).toUpperCase();
-
-        balances.push({
-          marketIndex: -1, // No market index
-          symbol: derivedSymbol,
-          balance: amount,
-          balanceFormatted: amount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
-          }),
-          decimals,
-          dollarValue: 0, // No price info available
-          priceUsd: 0,
-          tokenMint: mint,
-          icon: getTokenIconUrl(derivedSymbol),
         });
       }
     });
