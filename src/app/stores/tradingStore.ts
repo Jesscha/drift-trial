@@ -179,5 +179,6 @@ export const useTradingStore = create<TradingState>((set) => ({
       orderSubmitted: false,
       orderTxid: null,
       showConfirmation: false,
+      activeTab: "limit",
     }),
 }));
