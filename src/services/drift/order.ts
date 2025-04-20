@@ -174,14 +174,18 @@ export const placePerpOrder = async (
 export const placeMarketOrder = async (
   marketIndex: number,
   direction: PositionDirection,
-  size: number
+  size: number,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  return placePerpOrder({
-    marketIndex,
-    direction,
-    size,
-    orderType: OrderType.MARKET,
-  });
+  return placePerpOrder(
+    {
+      marketIndex,
+      direction,
+      size,
+      orderType: OrderType.MARKET,
+    },
+    subAccountId
+  );
 };
 
 /**
@@ -191,15 +195,19 @@ export const placeLimitOrder = async (
   marketIndex: number,
   direction: PositionDirection,
   size: number,
-  price: number
+  price: number,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  return placePerpOrder({
-    marketIndex,
-    direction,
-    size,
-    price,
-    orderType: OrderType.LIMIT,
-  });
+  return placePerpOrder(
+    {
+      marketIndex,
+      direction,
+      size,
+      price,
+      orderType: OrderType.LIMIT,
+    },
+    subAccountId
+  );
 };
 
 /**
@@ -209,15 +217,19 @@ export const placeOracleOrder = async (
   marketIndex: number,
   direction: PositionDirection,
   size: number,
-  oraclePriceOffset: number
+  oraclePriceOffset: number,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  return placePerpOrder({
-    marketIndex,
-    direction,
-    size,
-    orderType: OrderType.ORACLE,
-    oraclePriceOffset,
-  });
+  return placePerpOrder(
+    {
+      marketIndex,
+      direction,
+      size,
+      orderType: OrderType.ORACLE,
+      oraclePriceOffset,
+    },
+    subAccountId
+  );
 };
 
 /**
@@ -229,17 +241,21 @@ export const placeTriggerMarketOrder = async (
   size: number,
   triggerPrice: number,
   triggerCondition: TriggerCondition,
-  reduceOnly: boolean = false
+  reduceOnly: boolean = false,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  return placePerpOrder({
-    marketIndex,
-    direction,
-    size,
-    orderType: OrderType.TRIGGER_MARKET,
-    triggerPrice,
-    triggerCondition,
-    reduceOnly,
-  });
+  return placePerpOrder(
+    {
+      marketIndex,
+      direction,
+      size,
+      orderType: OrderType.TRIGGER_MARKET,
+      triggerPrice,
+      triggerCondition,
+      reduceOnly,
+    },
+    subAccountId
+  );
 };
 
 /**
@@ -252,18 +268,22 @@ export const placeTriggerLimitOrder = async (
   price: number,
   triggerPrice: number,
   triggerCondition: TriggerCondition,
-  reduceOnly: boolean = false
+  reduceOnly: boolean = false,
+  subAccountId?: number
 ): Promise<OrderResult> => {
-  return placePerpOrder({
-    marketIndex,
-    direction,
-    size,
-    price,
-    orderType: OrderType.TRIGGER_LIMIT,
-    triggerPrice,
-    triggerCondition,
-    reduceOnly,
-  });
+  return placePerpOrder(
+    {
+      marketIndex,
+      direction,
+      size,
+      price,
+      orderType: OrderType.TRIGGER_LIMIT,
+      triggerPrice,
+      triggerCondition,
+      reduceOnly,
+    },
+    subAccountId
+  );
 };
 
 /**
@@ -272,7 +292,8 @@ export const placeTriggerLimitOrder = async (
  * @returns OrderResult with success status and transaction ID
  */
 export const placeOrders = async (
-  orderParamsArray: PlacePerpOrderParams[]
+  orderParamsArray: PlacePerpOrderParams[],
+  subAccountId?: number
 ): Promise<OrderResult> => {
   const client = driftService.getClient();
   if (!client) {
@@ -353,7 +374,11 @@ export const placeOrders = async (
       return orderParams;
     });
 
-    const tx = await client.placeOrders(driftOrderParams);
+    const tx = await client.placeOrders(
+      driftOrderParams,
+      undefined,
+      subAccountId
+    );
     const txid = tx.toString();
 
     // Create a description that summarizes all orders

@@ -142,6 +142,7 @@ export function AccountCard({
                 markets={markets}
                 isLoadingMarkets={isLoadingMarkets}
                 viewOnly={viewOnly}
+                subAccountId={account.subAccountId}
               />
             </div>
           </div>

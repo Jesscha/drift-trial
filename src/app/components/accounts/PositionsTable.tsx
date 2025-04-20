@@ -15,6 +15,7 @@ interface PositionsTableProps {
   markets: Record<number, MarketData>;
   isLoadingMarkets: boolean;
   viewOnly?: boolean;
+  subAccountId: number;
 }
 
 export function PositionsTable({
@@ -22,6 +23,7 @@ export function PositionsTable({
   markets,
   isLoadingMarkets,
   viewOnly = false,
+  subAccountId,
 }: PositionsTableProps) {
   const { placeMarketOrder, isLoading } = usePerpOrder();
   const { trackTransaction } = useTransactions();
@@ -98,7 +100,8 @@ export function PositionsTable({
       const result = await placeMarketOrder(
         position.marketIndex,
         closeDirection,
-        parseFloat(size) / 1e9 // Adjust for decimal precision
+        parseFloat(size) / 1e9, // Adjust for decimal precision
+        subAccountId
       );
 
       if (result.success && result.txid) {
