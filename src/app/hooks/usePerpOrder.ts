@@ -73,11 +73,13 @@ export function usePerpOrder() {
     async (
       marketIndex: number,
       direction: PositionDirection,
-      size: number
+      size: number,
+      subAccountId?: number
     ): Promise<OrderResult> => {
       try {
         setIsLoading(true);
         setError(null);
+        const accountId = subAccountId || activeAccountId;
 
         const result = await placePerpOrder(
           {
@@ -86,7 +88,7 @@ export function usePerpOrder() {
             size,
             orderType: OrderType.MARKET,
           },
-          activeAccountId
+          accountId
         );
 
         if (result.success && result.txid) {
@@ -113,17 +115,20 @@ export function usePerpOrder() {
       marketIndex: number,
       direction: PositionDirection,
       size: number,
-      price: number
+      price: number,
+      subAccountId?: number
     ): Promise<OrderResult> => {
       try {
         setIsLoading(true);
         setError(null);
+        const accountId = subAccountId || activeAccountId;
 
         const result = await serviceLimitOrder(
           marketIndex,
           direction,
           size,
-          price
+          price,
+          accountId
         );
 
         if (result.success && result.txid) {
